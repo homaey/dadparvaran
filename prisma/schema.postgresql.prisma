@@ -1,0 +1,200 @@
+// ─── این فایل schema برای PostgreSQL (production) است ───────────────────────
+// برای استفاده:
+//   1. DATABASE_URL را به PostgreSQL تنظیم کنید
+//   2. این فایل را جایگزین schema.prisma کنید
+//   3. npx prisma migrate deploy
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  phone         String?   @unique
+  password      String
+  role          String    @default("CLIENT")
+  avatar        String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  lawyer        Lawyer?
+  consultations Consultation[]
+  docRequests   DocumentRequest[]
+  otpCodes      OtpCode[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model OtpCode {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("otp_codes")
+}
+
+model Lawyer {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  barNumber        String    @unique
+  status           String    @default("PENDING")
+  specialtiesFA    String[]  @default([])
+  specialtiesEN    String[]  @default([])
+  bioFA            String?
+  bioEN            String?
+  experience       Int       @default(0)
+  education        String?
+  licenseImage     String?
+  consultFee       Int       @default(0)
+  availableDays    String[]  @default([])
+  availableHours   String[]  @default([])
+  rating           Float     @default(0)
+  reviewCount      Int       @default(0)
+  totalCases       Int       @default(0)
+  isAvailable      Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consultations Consultation[]
+  docRequests   DocumentRequest[]
+  articles      Article[]
+
+  @@index([status])
+  @@map("lawyers")
+}
+
+model Consultation {
+  id          String    @id @default(cuid())
+  clientId    String
+  lawyerId    String
+  type        String    @default("PHONE")
+  status      String    @default("PENDING")
+  scheduledAt DateTime
+  duration    Int       @default(60)
+  fee         Int       @default(0)
+  notes       String?
+  meetLink    String?
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  client  User    @relation(fields: [clientId], references: [id])
+  lawyer  Lawyer  @relation(fields: [lawyerId], references: [id])
+  payment Payment?
+
+  @@index([clientId])
+  @@index([lawyerId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("consultations")
+}
+
+model DocumentRequest {
+  id          String    @id @default(cuid())
+  clientId    String
+  lawyerId    String?
+  type        String
+  status      String    @default("SUBMITTED")
+  subject     String
+  description String
+  attachments String[]  @default([])
+  outputFile  String?
+  fee         Int       @default(0)
+  notes       String?
+  dueAt       DateTime?
+  deliveredAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  client  User    @relation(fields: [clientId], references: [id])
+  lawyer  Lawyer? @relation(fields: [lawyerId], references: [id])
+  payment Payment?
+
+  @@index([clientId])
+  @@index([status])
+  @@map("document_requests")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  nameFA   String
+  nameEN   String
+  slug     String    @unique
+  articles Article[]
+
+  @@map("categories")
+}
+
+model Article {
+  id          String    @id @default(cuid())
+  authorId    String
+  categoryId  String?
+  titleFA     String
+  titleEN     String
+  slugFA      String    @unique
+  slugEN      String    @unique
+  excerptFA   String?
+  excerptEN   String?
+  contentFA   String
+  contentEN   String
+  coverImage  String?
+  status      String    @default("DRAFT")
+  readTimeMin Int       @default(5)
+  viewCount   Int       @default(0)
+  tags        String[]  @default([])
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   Lawyer    @relation(fields: [authorId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@index([status, publishedAt])
+  @@index([slugFA])
+  @@index([slugEN])
+  @@index([authorId])
+  @@map("articles")
+}
+
+model Payment {
+  id             String    @id @default(cuid())
+  amount         Int
+  status         String    @default("PENDING")
+  gateway        String    @default("zarinpal")
+  authority      String?
+  refId          String?
+  consultationId String?   @unique
+  docRequestId   String?   @unique
+  createdAt      DateTime  @default(now())
+  paidAt         DateTime?
+
+  consultation  Consultation?    @relation(fields: [consultationId], references: [id])
+  docRequest    DocumentRequest? @relation(fields: [docRequestId], references: [id])
+
+  @@index([status])
+  @@map("payments")
+}
+
+model SiteSettings {
+  id        String   @id @default("singleton")
+  data      Json     @default("{}")
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}

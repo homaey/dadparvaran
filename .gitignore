@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+out/
+dist/
+
+# local env
+.env
+.env.local
+.env.*.local
+
+# database
+prisma/dev.db
+prisma/dev.db-journal
+prisma/dev.db.backup*
+prisma/dev.db.bak*
+
+# uploads
+public/uploads/
+
+# reference files (not part of the app)
+_reference/
+
+# misc
+.DS_Store
+*.log
+nul
+seo-plan/

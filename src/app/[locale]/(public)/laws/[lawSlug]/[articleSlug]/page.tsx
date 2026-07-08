@@ -1,0 +1,186 @@
+import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ChevronLeft, Gavel, Tag as TagIcon, Users } from "lucide-react";
+import { getLegalArticleBySlug, getTagsForLegalNode } from "@/lib/laws";
+import { db } from "@/lib/db";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; lawSlug: string; articleSlug: string }>;
+}): Promise<Metadata> {
+  const { locale, lawSlug, articleSlug } = await params;
+  const decodedLaw = decodeURIComponent(lawSlug);
+  const decodedArticle = decodeURIComponent(articleSlug);
+  const article = await getLegalArticleBySlug(decodedLaw, decodedArticle);
+  if (!article) return { title: "Not Found" };
+  const isFA = locale === "fa";
+  return {
+    title: article.title,
+    description: isFA
+      ? `${article.title} — متن و تفسیر ماده قانونی`
+      : `${article.title} — Legal article text and interpretation`,
+    openGraph: {
+      title: article.title,
+      type: "article",
+      images: ["/og-image.jpg"],
+    },
+    alternates: {
+      canonical: `https://www.dadparvaran.com/${locale}/laws/${decodedLaw}/${decodedArticle}`,
+      languages: {
+        fa: `https://www.dadparvaran.com/fa/laws/${decodedLaw}/${decodedArticle}`,
+        en: `https://www.dadparvaran.com/en/laws/${decodedLaw}/${decodedArticle}`,
+      },
+    },
+  };
+}
+
+export default async function LegalArticlePage({
+  params,
+}: {
+  params: Promise<{ locale: string; lawSlug: string; articleSlug: string }>;
+}) {
+  const { locale, lawSlug, articleSlug } = await params;
+  const isRTL = locale === "fa";
+  const t = await getTranslations({ locale, namespace: "laws" });
+
+  const decodedLawSlug = decodeURIComponent(lawSlug);
+  const decodedArticleSlug = decodeURIComponent(articleSlug);
+
+  const article = await getLegalArticleBySlug(decodedLawSlug, decodedArticleSlug);
+  if (!article) notFound();
+
+  const tags = await getTagsForLegalNode(article.id);
+  const tagIds = tags.map((t) => t.id);
+
+  let relatedTeamMembers: any[] = [];
+  if (tagIds.length > 0) {
+    const teamTaggables = await db.taggable.findMany({
+      where: { taggableType: "TEAM_MEMBER", tagId: { in: tagIds } },
+    });
+    const memberIds = [...new Set(teamTaggables.map((t) => t.taggableId))];
+    if (memberIds.length > 0) {
+      relatedTeamMembers = await db.teamMember.findMany({
+        where: { id: { in: memberIds }, isActive: true },
+      });
+    }
+  }
+
+  return (
+    <div dir={isRTL ? "rtl" : "ltr"} className="py-24 min-h-screen">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap">
+          <Link href={`/${locale}/laws`} className="hover:text-primary-600 transition-colors">
+            {t("title")}
+          </Link>
+          <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+          <Link href={`/${locale}/laws/${decodedLawSlug}`} className="hover:text-primary-600 transition-colors">
+            {article.parent?.title ?? decodedLawSlug}
+          </Link>
+          <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+          <span className="text-primary-900 font-medium">
+            {article.articleNumber ? `${isRTL ? "ماده" : "Article"} ${article.articleNumber}` : article.title}
+          </span>
+        </nav>
+
+        {/* Article Content */}
+        <article className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <h1 className={`text-xl sm:text-2xl font-bold text-primary-900 mb-6 ${isRTL ? "font-fa-display" : "font-serif"}`}>
+            {article.title}
+          </h1>
+
+          {article.content && (
+            <div className="prose prose-lg max-w-none text-gray-700 leading-[1.9]" style={{ maxWidth: "65ch" }}>
+              <p className="whitespace-pre-wrap">{article.content}</p>
+            </div>
+          )}
+
+          {/* Tags */}
+          {tags.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-100">
+              <div className="flex items-center gap-2 mb-3">
+                <TagIcon className="w-4 h-4 text-gold-500" />
+                <span className="text-sm font-medium text-gray-700">
+                  {isRTL ? "موضوعات مرتبط" : "Related Topics"}
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Link
+                    key={tag.id}
+                    href={`/${locale}/tags/${tag.slug}`}
+                    className="text-xs bg-primary-50 text-primary-700 px-3 py-1.5 rounded-full hover:bg-primary-100 transition-colors"
+                  >
+                    {isRTL ? tag.nameFA : tag.nameEN}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </article>
+
+        {/* Related Rulings */}
+        {article.relatedRulings.length > 0 && (
+          <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <Gavel className="w-5 h-5 text-gold-500" />
+              <h2 className={`text-lg font-bold text-primary-900 ${isRTL ? "font-fa-display" : "font-serif"}`}>
+                {t("relatedRulings")}
+              </h2>
+            </div>
+            <div className="space-y-4">
+              {article.relatedRulings.map(({ ruling }) => (
+                <div key={ruling.id} className="border border-gray-100 rounded-xl p-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+                    <span className="bg-gold-50 text-gold-700 px-2 py-0.5 rounded text-xs font-medium">
+                      {ruling.kind}
+                    </span>
+                    <span>{isRTL ? "شماره" : "No."} {ruling.number}</span>
+                    <span>— {ruling.date}</span>
+                  </div>
+                  <p className="text-gray-700 text-sm leading-relaxed">{ruling.summary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Related Team Members */}
+        {relatedTeamMembers.length > 0 && (
+          <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+            <div className="flex items-center gap-2 mb-6">
+              <Users className="w-5 h-5 text-gold-500" />
+              <h2 className={`text-lg font-bold text-primary-900 ${isRTL ? "font-fa-display" : "font-serif"}`}>
+                {t("relatedExperts")}
+              </h2>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {relatedTeamMembers.map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/${locale}/team/${member.slug}`}
+                  className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold">
+                    {(isRTL ? member.nameFA : member.nameEN).charAt(0)}
+                  </div>
+                  <div>
+                    <div className="font-medium text-primary-900">
+                      {isRTL ? member.nameFA : member.nameEN}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {isRTL ? member.roleFA : member.roleEN}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

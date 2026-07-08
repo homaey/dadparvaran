@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── کاربران (ادمین و وکلا) ────────────────────────────────────────────────
+
+model User {
+  id            String      @id @default(cuid())
+  name          String
+  email         String      @unique
+  phone         String?     @unique
+  password      String
+  role          String      @default("LAWYER")
+  avatar        String?
+  emailVerified DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  teamMember TeamMember?
+}
+
+// ─── اعضای تیم (ادغام Lawyer + TeamMember) ─────────────────────────────────
+
+model TeamMember {
+  id               Int      @id @default(autoincrement())
+  nameFA           String
+  nameEN           String
+  slug             String   @unique
+  roleFA           String
+  roleEN           String
+  bioFA            String
+  bioEN            String
+  photoUrl         String?
+  barNumber        String?  @unique
+  experience       Int      @default(0)
+  education        String?
+  phone            String?
+  licenseImage     String?
+  isAvailable      Boolean  @default(true)
+  isActive         Boolean  @default(true)
+  status           String   @default("APPROVED")
+  order            Int      @default(0)
+  userId           String?  @unique
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  articles Article[]
+}
+
+// ─── مقالات ────────────────────────────────────────────────────────────────
+
+model Category {
+  id       String    @id @default(cuid())
+  nameFA   String
+  nameEN   String
+  slug     String    @unique
+  articles Article[]
+}
+
+model Article {
+  id          Int       @id @default(autoincrement())
+  authorId    Int
+  categoryId  String?
+  title       String
+  slug        String    @unique
+  excerpt     String?
+  blocks      String    @default("[]")
+  coverImage  String?
+  status      String    @default("DRAFT")
+  readTimeMin Int       @default(5)
+  viewCount   Int       @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  author   TeamMember @relation(fields: [authorId], references: [id])
+  category Category?  @relation(fields: [categoryId], references: [id])
+}
+
+// ─── قوانین و مقررات ───────────────────────────────────────────────────────
+
+model LegalNode {
+  id                Int         @id @default(autoincrement())
+  parentId          Int?
+  parent            LegalNode?  @relation("NodeHierarchy", fields: [parentId], references: [id])
+  children          LegalNode[] @relation("NodeHierarchy")
+  type              String
+  title             String
+  slug              String
+  lawKey            String?     @unique
+  lawId             Int?
+  articleNumber     String?
+  content           String?
+  orderIndex        Int         @default(0)
+  adoptionDate      String?
+  adoptionAuthority String?
+  sourceUrl         String?
+  isRepealed        Boolean     @default(false)
+  lastAmendedAt     DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  relatedRulings NodeRelatedRuling[]
+
+  @@unique([parentId, slug])
+}
+
+// ─── آرای وحدت رویه و نظریات مشورتی ───────────────────────────────────────
+
+model Ruling {
+  id           Int                 @id @default(autoincrement())
+  kind         String
+  number       String
+  date         String
+  summary      String
+  fullText     String?
+  sourceUrl    String?
+  relatedNodes NodeRelatedRuling[]
+}
+
+model NodeRelatedRuling {
+  legalNodeId Int
+  legalNode   LegalNode @relation(fields: [legalNodeId], references: [id])
+  rulingId    Int
+  ruling      Ruling    @relation(fields: [rulingId], references: [id])
+
+  @@id([legalNodeId, rulingId])
+}
+
+// ─── تگ‌ها (سیستم مشترک) ──────────────────────────────────────────────────
+
+model Tag {
+  id          Int        @id @default(autoincrement())
+  category    String
+  nameFA      String
+  nameEN      String
+  slug        String     @unique
+  description String?
+  taggables   Taggable[]
+}
+
+model Taggable {
+  tagId        Int
+  tag          Tag    @relation(fields: [tagId], references: [id])
+  taggableType String // LEGAL_NODE | TEAM_MEMBER | ARTICLE
+  taggableId   Int
+
+  @@id([tagId, taggableType, taggableId])
+}
+
+// ─── ماشین‌حساب‌ها ──────────────────────────────────────────────────────────
+
+model Calculator {
+  id            Int     @id @default(autoincrement())
+  slug          String  @unique
+  titleFA       String
+  titleEN       String
+  descriptionFA String?
+  descriptionEN String?
+  isPublished   Boolean @default(false)
+  inputsSchema  String?
+  order         Int     @default(0)
+}
+
+// ─── شاخص بها (تورم) ─────────────────────────────────────────────────────
+
+model PriceIndex {
+  id          Int       @id @default(autoincrement())
+  jalaliYear  Int
+  jalaliMonth Int       @default(0) // 0 = سالانه, 1-12 = ماهانه
+  value       Float
+  sourceTitle String?
+  sourceUrl   String?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([jalaliYear, jalaliMonth])
+}
+
+// ─── نرخ دیه ──────────────────────────────────────────────────────────────
+
+model DiyeRate {
+  id          Int       @id @default(autoincrement())
+  jalaliYear  Int       @unique
+  amount      BigInt
+  sourceTitle String?
+  sourceUrl   String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ─── مهلت‌های قضایی ──────────────────────────────────────────────────────────
+
+model LegalDeadline {
+  id          Int     @id @default(autoincrement())
+  category    String  // civil | executionCivil | criminal
+  title       String
+  days        Int
+  foreignDays Int?
+  article     String?
+  defaultMode String? // "minimum" for minimum-gap deadlines
+  orderIndex  Int     @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([category, title])
+}
+
+// ─── تعطیلات رسمی ───────────────────────────────────────────────────────────
+
+model Holiday {
+  id          Int     @id @default(autoincrement())
+  jalaliYear  Int
+  jalaliMonth Int
+  jalaliDay   Int
+  title       String?
+  isFixed     Boolean @default(false) // true = تعطیلات ثابت شمسی
+  createdAt   DateTime @default(now())
+
+  @@unique([jalaliYear, jalaliMonth, jalaliDay])
+}
+
+// ─── تنظیمات سایت ──────────────────────────────────────────────────────────
+
+model SiteSettings {
+  id        String   @id @default("singleton")
+  data      String   @default("{}")
+  updatedAt DateTime @updatedAt
+}
+
+// ─── دسته‌بندی اوراق قضایی (درخت‌واره موضوعی) ─────────────────────────────
+
+model LegalFormCategory {
+  id          Int                 @id @default(autoincrement())
+  parentId    Int?
+  parent      LegalFormCategory?  @relation("FormCatHierarchy", fields: [parentId], references: [id])
+  children    LegalFormCategory[] @relation("FormCatHierarchy")
+  nameFA      String
+  nameEN      String              @default("")
+  slug        String              @unique
+  descFA      String              @default("")
+  descEN      String              @default("")
+  icon        String?
+  order       Int                 @default(0)
+  templates   LegalFormTemplate[]
+
+  @@unique([parentId, slug])
+}
+
+// ─── نمونه اوراق قضایی ─────────────────────────────────────────────────────
+
+model LegalFormTemplate {
+  id          Int                @id @default(autoincrement())
+  slug        String             @unique
+  categoryId  Int?
+  category    LegalFormCategory? @relation(fields: [categoryId], references: [id])
+  docType     String             // petition | complaint | declaration | appeal
+  titleFA     String
+  titleEN     String             @default("")
+  descFA      String             @default("")
+  descEN      String             @default("")
+  content     String             @default("") // HTML body of the form document
+  isPublished Boolean            @default(true)
+  order       Int                @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+}

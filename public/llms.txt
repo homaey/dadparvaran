@@ -1,0 +1,65 @@
+# Dadparvaran Mehr Iran Legal Institute
+# مؤسسه حقوقی دادپروران مهر ایران
+
+> A professional legal services institute based in Iran, providing expert legal consultation, representation, and educational resources through a team of licensed first-class attorneys.
+
+## About
+
+Dadparvaran Mehr Iran Legal Institute offers comprehensive legal services across civil, criminal, family, and commercial law. The institute operates three offices in Tehran, Ahvaz, and Andimeshk, serving clients nationwide.
+
+## Services
+
+- Civil Law (حقوق مدنی): Property disputes, contracts, debt recovery
+- Criminal Law (حقوق کیفری): Defense, complaints, appeals
+- Family Law (حقوق خانواده): Divorce, custody, alimony, dowry (مهریه)
+- Commercial Law (حقوق تجاری): Company formation, partnerships, bankruptcy
+- Labor Law (حقوق کار): Employment disputes, social security
+- Real Estate Law (حقوق ملکی): Property transactions, construction disputes
+- Insurance Law (حقوق بیمه): Claims, liability
+- Administrative Law (حقوق اداری): Government disputes, licensing
+- Banking Law (حقوق بانکی): Financial disputes, guarantees
+
+## Legal Tools
+
+- Inflation Adjustment Calculator (محاسبه‌گر تعدیل تورمی): Adjusts monetary values based on Central Bank of Iran price indices
+- Diye Calculator (محاسبه‌گر دیه): Calculates blood money amounts per Iranian law
+- Legal Deadline Calculator (محاسبه‌گر مهلت قانونی): Computes legal deadlines accounting for holidays
+
+## Content
+
+- Legal articles and educational blog posts (مقالات حقوقی)
+- Full text of Iranian laws and regulations (قوانین)
+- Legal deadline reference database (مهلت‌های قانونی)
+
+## Contact
+
+- Phone: +98 61 9101 0285
+- Email: info@legalfirm.ir
+- Website: https://www.dadparvaran.com
+
+## Offices
+
+### Tehran Office
+Motahhari St., Soleimankhater, Masjed Alley, No. 19, Unit 8, Tehran, Iran
+
+### Ahvaz Office
+Kianpars, 14th West St., Phase 1, Kianpars Tower, Floor 8, Unit 1, Ahvaz, Khuzestan, Iran
+
+### Andimeshk Office
+Panahi St., 2nd Floor, Abadi Passage, Andimeshk, Khuzestan, Iran
+
+## Languages
+
+- Persian (فارسی) - Primary
+- English - Secondary
+
+## URLs
+
+- Homepage: https://www.dadparvaran.com/fa
+- Services: https://www.dadparvaran.com/fa/services
+- Lawyers: https://www.dadparvaran.com/fa/lawyers
+- Articles: https://www.dadparvaran.com/fa/articles
+- Laws: https://www.dadparvaran.com/fa/laws
+- Calculators: https://www.dadparvaran.com/fa/calculators
+- Contact: https://www.dadparvaran.com/fa/contact
+- About: https://www.dadparvaran.com/fa/about

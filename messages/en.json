@@ -1,0 +1,167 @@
+{
+  "nav": {
+    "home": "Home",
+    "laws": "Laws",
+    "articles": "Articles",
+    "team": "Our Team",
+    "calculators": "Calculators",
+    "contact": "Contact",
+    "consultation": "Free Consultation"
+  },
+  "hero": {
+    "badge": "Legal Institute",
+    "title": "Professional Legal",
+    "titleHighlight": "Consultation & Services",
+    "subtitle": "Expert legal representation, consultation, and document preparation by the specialized team of licensed attorneys at Dadparvaraan Mehr Iran",
+    "cta": "Free Consultation",
+    "ctaSecondary": "Browse Laws",
+    "stats": {
+      "cases": "Successful Cases",
+      "clients": "Legal Articles",
+      "experience": "Years Experience",
+      "lawyers": "Expert Lawyers"
+    }
+  },
+  "services": {
+    "title": "Our Legal Services",
+    "subtitle": "Providing the most comprehensive legal services with international standards",
+    "items": {
+      "civil": {
+        "title": "Civil Litigation",
+        "desc": "Legal representation in civil, contractual, property and family cases"
+      },
+      "criminal": {
+        "title": "Criminal Defense",
+        "desc": "Defending client rights in criminal cases and public offenses"
+      },
+      "commercial": {
+        "title": "Commercial Law",
+        "desc": "Corporate consulting, commercial contract drafting, company registration"
+      },
+      "documents": {
+        "title": "Legal Documents",
+        "desc": "Preparation of notices, petitions, complaints and legal briefs"
+      },
+      "estate": {
+        "title": "Property Law",
+        "desc": "Real estate transactions, land disputes, title inquiries and deeds"
+      },
+      "family": {
+        "title": "Family Law",
+        "desc": "Divorce, alimony, custody, dowry and inheritance matters"
+      }
+    }
+  },
+  "laws": {
+    "title": "Laws & Regulations",
+    "subtitle": "Access the full text of laws with tree structure and links to judicial rulings",
+    "viewLaw": "View Law",
+    "articles": "Articles",
+    "adoptionDate": "Adoption Date",
+    "adoptionAuthority": "Adoption Authority",
+    "relatedRulings": "Related Rulings",
+    "relatedArticles": "Related Articles",
+    "relatedExperts": "Expert Lawyers"
+  },
+  "lawyers": {
+    "title": "Our Lawyers",
+    "subtitle": "Our expert team consists of licensed bar attorneys with extensive experience",
+    "viewProfile": "View Profile",
+    "experience": "Years Experience",
+    "cases": "Cases"
+  },
+  "team": {
+    "title": "Our Team",
+    "subtitle": "Meet our legal team members and their areas of expertise",
+    "viewProfile": "View Profile",
+    "specialties": "Specialties",
+    "barNumber": "Bar License Number"
+  },
+  "articles": {
+    "title": "Legal Articles & News",
+    "subtitle": "Latest analyses and legal guides by our expert lawyers",
+    "readMore": "Read More",
+    "minRead": "min read",
+    "categories": {
+      "civil": "Civil Law",
+      "criminal": "Criminal Law",
+      "commercial": "Commercial Law",
+      "family": "Family Law",
+      "estate": "Property Law"
+    }
+  },
+  "tags": {
+    "title": "Topics",
+    "relatedLaws": "Related Laws",
+    "relatedArticles": "Related Articles",
+    "relatedTeam": "Expert Lawyers"
+  },
+  "calculators": {
+    "title": "Legal Calculators",
+    "badge": "Legal Tools",
+    "subtitle": "Free calculation tools for late payment damages, dowry, diye and inheritance — no registration required",
+    "comingSoon": "Coming Soon"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Contact us for a free consultation",
+    "address": "Address",
+    "addressValue": "Tehran, Motahhari St., Soleimankhater, Masjed Alley, No. 19, Unit 8",
+    "phone": "Phone",
+    "phoneValue": "+98 61 9101 0285",
+    "email": "Email",
+    "emailValue": "info@dadparvaran.com",
+    "hours": "Working Hours",
+    "hoursValue": "Sat–Wed: 8AM–5PM | Thu: 8AM–1PM",
+    "form": {
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "message": "Your Message",
+      "submit": "Send Message",
+      "success": "Your message has been received. We will respond shortly."
+    }
+  },
+  "footer": {
+    "description": "Dadparvaraan Mehr Iran Legal Institute — Professional legal representation and consultation with 20+ years of experience",
+    "links": "Quick Links",
+    "services": "Services",
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "seo": {
+    "home": {
+      "title": "Dadparvaraan Mehr Iran — Professional Legal Consultation & Services",
+      "description": "Expert legal representation, consultation, document preparation, and legal calculation tools by licensed attorneys"
+    },
+    "laws": {
+      "title": "Laws & Regulations — Tree Structure of Iranian Laws",
+      "description": "Access the full text of Iranian laws with tree structure and links to judicial rulings and advisory opinions"
+    },
+    "team": {
+      "title": "Our Team — Expert Lawyers",
+      "description": "Meet our licensed bar attorneys specializing in various areas of law"
+    },
+    "articles": {
+      "title": "Legal Articles — Expert Guides & Analysis",
+      "description": "Legal articles and guides covering civil, criminal, commercial and family law"
+    },
+    "contact": {
+      "title": "Contact Dadparvaraan Mehr Iran",
+      "description": "Contact us for a free legal consultation"
+    },
+    "services": {
+      "title": "Legal Services — Litigation & Consultation",
+      "description": "Expert legal services in civil, criminal, family, commercial, property litigation and official document preparation by licensed attorneys"
+    },
+    "calculators": {
+      "title": "Legal Calculators — Online Damage & Diye Calculation",
+      "description": "Free tools to calculate late payment damages, dowry at current rates, diye, and judicial deadlines based on Iranian law"
+    },
+    "lawyers": {
+      "title": "Our Legal Team — Attorneys & Legal Consultants",
+      "description": "Meet the licensed attorneys and legal consultants of Dadparvaraan Mehr Iran and their areas of expertise"
+    }
+  }
+}

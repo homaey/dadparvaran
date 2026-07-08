@@ -1,0 +1,18 @@
+{
+  "name": "دادپروران مهر ایران",
+  "short_name": "دادپروران",
+  "description": "مؤسسه حقوقی دادپروران مهر ایران — مشاوره و خدمات حقوقی تخصصی",
+  "start_url": "/fa",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E3A8A",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
