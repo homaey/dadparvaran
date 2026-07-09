@@ -8,7 +8,9 @@ export default function middleware(request: NextRequest) {
   const { hostname, pathname } = request.nextUrl;
 
   if (hostname === "dadparvaran.com" && pathname === "/") {
-    return NextResponse.redirect("https://www.dadparvaran.com/fa", 308);
+    const url = request.nextUrl.clone();
+    url.pathname = "/fa";
+    return NextResponse.redirect(url, 308);
   }
 
   return intlMiddleware(request);
