@@ -17,12 +17,10 @@ export async function generateMetadata({
   const decodedArticle = decodeURIComponent(articleSlug);
   const article = await getLegalArticleBySlug(decodedLaw, decodedArticle);
   if (!article) return { title: "Not Found" };
-  const isFA = locale === "fa";
+
   return {
     title: article.title,
-    description: isFA
-      ? `${article.title} — متن و تفسیر ماده قانونی`
-      : `${article.title} — Legal article text and interpretation`,
+    description: `${article.title} — متن و تفسیر ماده قانونی`,
     openGraph: {
       title: article.title,
       type: "article",
@@ -57,14 +55,14 @@ export default async function LegalArticlePage({
   const { prev, next } = article.lawId
     ? await getAdjacentArticles(article.lawId, article.orderIndex, article.parentId)
     : { prev: null, next: null };
-  const tagIds = tags.map((t) => t.id);
+  const tagIds = tags.map((tag) => tag.id);
 
   let relatedTeamMembers: any[] = [];
   if (tagIds.length > 0) {
     const teamTaggables = await db.taggable.findMany({
       where: { taggableType: "TEAM_MEMBER", tagId: { in: tagIds } },
     });
-    const memberIds = [...new Set(teamTaggables.map((t) => t.taggableId))];
+    const memberIds = [...new Set(teamTaggables.map((taggable) => taggable.taggableId))];
     if (memberIds.length > 0) {
       relatedTeamMembers = await db.teamMember.findMany({
         where: { id: { in: memberIds }, isActive: true },
@@ -73,27 +71,23 @@ export default async function LegalArticlePage({
   }
 
   return (
-    <div dir={isRTL ? "rtl" : "ltr"} className="py-24 min-h-screen">
+    <div dir="rtl" className="py-24 min-h-screen font-fa">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap">
+        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8 flex-wrap text-right">
           <Link href={`/${locale}/laws`} className="hover:text-primary-600 transition-colors">
             {t("title")}
           </Link>
-          <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+          <ChevronLeft className="w-4 h-4" />
           <Link href={`/${locale}/laws/${decodedLawSlug}`} className="hover:text-primary-600 transition-colors">
             <span className="font-fa">{toPersianDigits(article.parent?.title ?? decodedLawSlug)}</span>
           </Link>
-          <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+          <ChevronLeft className="w-4 h-4" />
           <span className="text-primary-900 font-medium">
-            {article.articleNumber
-              ? `${isRTL ? "ماده" : "Article"} ${toPersianDigits(article.articleNumber)}`
-              : toPersianDigits(article.title)}
+            {article.articleNumber ? `ماده ${toPersianDigits(article.articleNumber)}` : toPersianDigits(article.title)}
           </span>
         </nav>
 
-        {/* Article Content */}
-        <article className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+        <article dir="rtl" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-right font-fa">
           <h1 className="text-xl sm:text-2xl font-bold text-primary-900 mb-6 font-fa-display">
             {toPersianDigits(article.title)}
           </h1>
@@ -104,7 +98,6 @@ export default async function LegalArticlePage({
             </div>
           )}
 
-          {/* Tags */}
           {tags.length > 0 && (
             <div className="mt-8 pt-6 border-t border-gray-100">
               <div className="flex items-center gap-2 mb-3">
@@ -129,20 +122,17 @@ export default async function LegalArticlePage({
 
           {(prev || next) && (
             <nav
-              aria-label={isRTL ? "پیمایش بین مواد قانون" : "Navigate legal articles"}
+              aria-label="پیمایش بین مواد قانون"
               className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-gray-100"
             >
-              <div>
+              <div className="text-right">
                 {prev && (
                   <Link
                     href={`/${locale}/laws/${decodedLawSlug}/${prev.slug}`}
                     className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800 font-fa"
                   >
-                    <ChevronRight className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
-                    <span>
-                      {isRTL ? "ماده قبلی" : "Previous article"}
-                      {prev.articleNumber && `: ${toPersianDigits(prev.articleNumber)}`}
-                    </span>
+                    <ChevronRight className="w-4 h-4" />
+                    <span>قبلی</span>
                   </Link>
                 )}
               </div>
@@ -152,11 +142,8 @@ export default async function LegalArticlePage({
                     href={`/${locale}/laws/${decodedLawSlug}/${next.slug}`}
                     className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800 font-fa"
                   >
-                    <span>
-                      {isRTL ? "ماده بعدی" : "Next article"}
-                      {next.articleNumber && `: ${toPersianDigits(next.articleNumber)}`}
-                    </span>
-                    <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+                    <span>بعدی</span>
+                    <ChevronLeft className="w-4 h-4" />
                   </Link>
                 )}
               </div>
@@ -164,12 +151,11 @@ export default async function LegalArticlePage({
           )}
         </article>
 
-        {/* Related Rulings */}
         {article.relatedRulings.length > 0 && (
-          <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <div dir="rtl" className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-right font-fa">
             <div className="flex items-center gap-2 mb-6">
               <Gavel className="w-5 h-5 text-gold-500" />
-              <h2 className={`text-lg font-bold text-primary-900 ${isRTL ? "font-fa-display" : "font-serif"}`}>
+              <h2 className="text-lg font-bold text-primary-900 font-fa-display">
                 {t("relatedRulings")}
               </h2>
             </div>
@@ -180,7 +166,7 @@ export default async function LegalArticlePage({
                     <span className="bg-gold-50 text-gold-700 px-2 py-0.5 rounded text-xs font-medium">
                       {ruling.kind}
                     </span>
-                    <span>{isRTL ? "شماره" : "No."} {toPersianDigits(ruling.number)}</span>
+                    <span>شماره {toPersianDigits(ruling.number)}</span>
                     <span>— {toPersianDigits(ruling.date)}</span>
                   </div>
                   <p className="text-gray-700 text-sm leading-relaxed font-fa">{toPersianDigits(ruling.summary)}</p>
@@ -190,12 +176,11 @@ export default async function LegalArticlePage({
           </div>
         )}
 
-        {/* Related Team Members */}
         {relatedTeamMembers.length > 0 && (
-          <div className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+          <div dir="rtl" className="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-right font-fa">
             <div className="flex items-center gap-2 mb-6">
               <Users className="w-5 h-5 text-gold-500" />
-              <h2 className={`text-lg font-bold text-primary-900 ${isRTL ? "font-fa-display" : "font-serif"}`}>
+              <h2 className="text-lg font-bold text-primary-900 font-fa-display">
                 {t("relatedExperts")}
               </h2>
             </div>
