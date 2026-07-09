@@ -1,8 +1,8 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Gavel, Tag as TagIcon, Users } from "lucide-react";
-import { getLegalArticleBySlug, getTagsForLegalNode } from "@/lib/laws";
+import { ChevronLeft, ChevronRight, Gavel, Tag as TagIcon, Users } from "lucide-react";
+import { getAdjacentArticles, getLegalArticleBySlug, getTagsForLegalNode } from "@/lib/laws";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import { toPersianDigits } from "@/lib/utils";
@@ -54,6 +54,9 @@ export default async function LegalArticlePage({
   if (!article) notFound();
 
   const tags = await getTagsForLegalNode(article.id);
+  const { prev, next } = article.lawId
+    ? await getAdjacentArticles(article.lawId, article.orderIndex, article.parentId)
+    : { prev: null, next: null };
   const tagIds = tags.map((t) => t.id);
 
   let relatedTeamMembers: any[] = [];
@@ -122,6 +125,42 @@ export default async function LegalArticlePage({
                 ))}
               </div>
             </div>
+          )}
+
+          {(prev || next) && (
+            <nav
+              aria-label={isRTL ? "پیمایش بین مواد قانون" : "Navigate legal articles"}
+              className="grid grid-cols-2 gap-4 mt-8 pt-6 border-t border-gray-100"
+            >
+              <div>
+                {prev && (
+                  <Link
+                    href={`/${locale}/laws/${decodedLawSlug}/${prev.slug}`}
+                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800 font-fa"
+                  >
+                    <ChevronRight className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+                    <span>
+                      {isRTL ? "ماده قبلی" : "Previous article"}
+                      {prev.articleNumber && `: ${toPersianDigits(prev.articleNumber)}`}
+                    </span>
+                  </Link>
+                )}
+              </div>
+              <div className="text-left">
+                {next && (
+                  <Link
+                    href={`/${locale}/laws/${decodedLawSlug}/${next.slug}`}
+                    className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-800 font-fa"
+                  >
+                    <span>
+                      {isRTL ? "ماده بعدی" : "Next article"}
+                      {next.articleNumber && `: ${toPersianDigits(next.articleNumber)}`}
+                    </span>
+                    <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
+                  </Link>
+                )}
+              </div>
+            </nav>
           )}
         </article>
 
