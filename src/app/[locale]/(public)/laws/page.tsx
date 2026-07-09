@@ -63,7 +63,7 @@ export default async function LawsPage({
                   <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-100 transition-colors">
                     <Landmark className="w-6 h-6 text-primary-700" />
                   </div>
-                  <h2 className="text-lg font-bold text-primary-900 mb-2 font-fa-display">
+                  <h2 className="text-lg font-bold text-primary-900 mb-2 !font-fa-display">
                     {toPersianDigits(law.title)}
                   </h2>
                   {law.adoptionDate && (
