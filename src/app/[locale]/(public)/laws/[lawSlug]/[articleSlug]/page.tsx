@@ -88,7 +88,7 @@ export default async function LegalArticlePage({
         </nav>
 
         <article dir="rtl" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-right font-fa">
-          <h1 className="text-xl sm:text-2xl font-bold text-primary-900 mb-6 font-fa-display">
+          <h1 className="text-xl sm:text-2xl font-bold text-primary-900 mb-6 font-fa">
             {toPersianDigits(article.title)}
           </h1>
 
