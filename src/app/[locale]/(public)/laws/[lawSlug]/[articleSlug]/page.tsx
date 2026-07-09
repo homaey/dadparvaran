@@ -5,6 +5,7 @@ import { ChevronLeft, Gavel, Tag as TagIcon, Users } from "lucide-react";
 import { getLegalArticleBySlug, getTagsForLegalNode } from "@/lib/laws";
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
+import { toPersianDigits } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -78,23 +79,25 @@ export default async function LegalArticlePage({
           </Link>
           <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
           <Link href={`/${locale}/laws/${decodedLawSlug}`} className="hover:text-primary-600 transition-colors">
-            {article.parent?.title ?? decodedLawSlug}
+            <span className="font-fa">{toPersianDigits(article.parent?.title ?? decodedLawSlug)}</span>
           </Link>
           <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
           <span className="text-primary-900 font-medium">
-            {article.articleNumber ? `${isRTL ? "ماده" : "Article"} ${article.articleNumber}` : article.title}
+            {article.articleNumber
+              ? `${isRTL ? "ماده" : "Article"} ${toPersianDigits(article.articleNumber)}`
+              : toPersianDigits(article.title)}
           </span>
         </nav>
 
         {/* Article Content */}
         <article className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <h1 className={`text-xl sm:text-2xl font-bold text-primary-900 mb-6 ${isRTL ? "font-fa-display" : "font-serif"}`}>
-            {article.title}
+          <h1 className="text-xl sm:text-2xl font-bold text-primary-900 mb-6 font-fa-display">
+            {toPersianDigits(article.title)}
           </h1>
 
           {article.content && (
-            <div className="prose prose-lg max-w-none text-gray-700 leading-[1.9]" style={{ maxWidth: "65ch" }}>
-              <p className="whitespace-pre-wrap">{article.content}</p>
+            <div className="prose prose-lg max-w-none text-gray-700 leading-[1.9] font-fa" style={{ maxWidth: "65ch" }}>
+              <p className="whitespace-pre-wrap">{toPersianDigits(article.content)}</p>
             </div>
           )}
 
@@ -138,10 +141,10 @@ export default async function LegalArticlePage({
                     <span className="bg-gold-50 text-gold-700 px-2 py-0.5 rounded text-xs font-medium">
                       {ruling.kind}
                     </span>
-                    <span>{isRTL ? "شماره" : "No."} {ruling.number}</span>
-                    <span>— {ruling.date}</span>
+                    <span>{isRTL ? "شماره" : "No."} {toPersianDigits(ruling.number)}</span>
+                    <span>— {toPersianDigits(ruling.date)}</span>
                   </div>
-                  <p className="text-gray-700 text-sm leading-relaxed">{ruling.summary}</p>
+                  <p className="text-gray-700 text-sm leading-relaxed font-fa">{toPersianDigits(ruling.summary)}</p>
                 </div>
               ))}
             </div>

@@ -4,6 +4,7 @@ import { Landmark, Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { getAllLaws } from "@/lib/laws";
 import type { Metadata } from "next";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
+import { toPersianDigits } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -62,13 +63,13 @@ export default async function LawsPage({
                   <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary-100 transition-colors">
                     <Landmark className="w-6 h-6 text-primary-700" />
                   </div>
-                  <h2 className={`text-lg font-bold text-primary-900 mb-2 ${isRTL ? "font-fa-display" : "font-serif"}`}>
-                    {law.title}
+                  <h2 className="text-lg font-bold text-primary-900 mb-2 font-fa-display">
+                    {toPersianDigits(law.title)}
                   </h2>
                   {law.adoptionDate && (
                     <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                       <Calendar className="w-4 h-4" />
-                      <span>{t("adoptionDate")}: {law.adoptionDate}</span>
+                      <span>{t("adoptionDate")}: {toPersianDigits(law.adoptionDate)}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1 text-primary-600 text-sm font-medium group-hover:text-primary-700 transition-colors">

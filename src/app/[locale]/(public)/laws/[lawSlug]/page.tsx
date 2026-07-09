@@ -1,9 +1,10 @@
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ChevronRight, Calendar, Building2, BookOpen } from "lucide-react";
+import { ChevronLeft, Calendar, Building2 } from "lucide-react";
 import { getLawBySlug, getLawTree, getTagsForLegalNode } from "@/lib/laws";
 import type { Metadata } from "next";
+import { toPersianDigits } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -53,27 +54,27 @@ export default async function LawDetailPage({
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"} className="py-24 min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
           <Link href={`/${locale}/laws`} className="hover:text-primary-600 transition-colors">
             {t("title")}
           </Link>
           <ChevronLeft className={`w-4 h-4 ${isRTL ? "" : "rotate-180"}`} />
-          <span className="text-primary-900 font-medium">{law.title}</span>
+          <span className="text-primary-900 font-medium font-fa">{toPersianDigits(law.title)}</span>
         </nav>
 
         {/* Header */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 mb-8">
-          <h1 className={`text-2xl sm:text-3xl font-bold text-primary-900 mb-4 ${isRTL ? "font-fa-display" : "font-serif"}`}>
-            {law.title}
+        <div dir="rtl" className="bg-white border border-gray-200 px-6 sm:px-8 py-6 font-fa">
+          <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-4 font-fa-display">
+            {toPersianDigits(law.title)}
           </h1>
 
           <div className="flex flex-wrap gap-4 text-sm text-gray-600">
             {law.adoptionDate && (
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-gold-500" />
-                <span>{t("adoptionDate")}: {law.adoptionDate}</span>
+                <span>{t("adoptionDate")}: {toPersianDigits(law.adoptionDate)}</span>
               </div>
             )}
             {law.adoptionAuthority && (
@@ -99,55 +100,56 @@ export default async function LawDetailPage({
           )}
         </div>
 
-        {/* Tree */}
-        <div className="space-y-4">
+        {/* Full law text */}
+        <div dir="rtl" className="bg-white border-x border-b border-gray-200 px-6 sm:px-8 font-fa">
           {(() => {
             const sections = tree.filter((n) => n.type === "SECTION");
             const directArticles = tree.filter((n) => n.type === "ARTICLE");
 
             const renderArticleLink = (article: (typeof tree)[number]) => (
-              <Link
+              <section
                 key={article.id}
-                href={`/${locale}/laws/${decodedSlug}/${article.slug}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer group"
+                id={article.slug}
+                className="py-5 border-b border-gray-200 last:border-b-0"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <BookOpen className="w-4 h-4 text-gold-500 shrink-0" />
-                  <span className="text-gray-800 group-hover:text-primary-700 transition-colors">
-                    {article.title}
-                  </span>
-                </div>
-                {isRTL ? (
-                  <ChevronLeft className="w-4 h-4 text-gray-400 group-hover:text-primary-600 shrink-0" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-primary-600 shrink-0" />
+                <Link
+                  href={`/${locale}/laws/${decodedSlug}/${article.slug}`}
+                  className="inline-block text-primary-600 hover:text-primary-800 font-semibold mb-3"
+                >
+                    {toPersianDigits(article.title)}
+                </Link>
+                {article.content && (
+                  <p className="whitespace-pre-wrap text-gray-900 text-base sm:text-lg leading-[2.15] text-justify">
+                    {toPersianDigits(article.content)}
+                  </p>
                 )}
-              </Link>
+              </section>
             );
 
             const renderSection = (section: (typeof tree)[number]) => (
-              <div key={section.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="bg-primary-50 px-6 py-4 border-b border-gray-100">
-                  <h2 className={`font-bold text-primary-900 ${isRTL ? "font-fa-display" : "font-serif"}`}>
-                    {section.title}
+              <section key={section.id}>
+                <div className="py-5 border-b border-gray-200">
+                  <h2 className="text-primary-600 text-lg sm:text-xl font-semibold font-fa-display">
+                    {toPersianDigits(section.title)}
                   </h2>
+                  {section.content && (
+                    <p className="mt-3 whitespace-pre-wrap text-gray-900 text-base sm:text-lg leading-[2.15] text-justify">
+                      {toPersianDigits(section.content)}
+                    </p>
+                  )}
                 </div>
-                <div className="divide-y divide-gray-50">
+                <div>
                   {section.children.map((child) =>
                     child.type === "SECTION" ? renderSection(child) : renderArticleLink(child)
                   )}
                 </div>
-              </div>
+              </section>
             );
 
             return (
               <>
                 {directArticles.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div className="divide-y divide-gray-50">
-                      {directArticles.map(renderArticleLink)}
-                    </div>
-                  </div>
+                  <div>{directArticles.map(renderArticleLink)}</div>
                 )}
                 {sections.map(renderSection)}
               </>
