@@ -313,7 +313,7 @@ export default async function FormTemplatePage({
                           </div>
                           <div className="flex-1 min-w-0">
                             <Link
-                              href={`/${locale}/lawyers/${lawyer.slug}`}
+                              href={`/${locale}/lawyers/${lawyer.id}`}
                               className="text-sm font-bold text-white hover:text-gold-300 transition-colors"
                             >
                               {isRTL ? lawyer.nameFA : lawyer.nameEN}

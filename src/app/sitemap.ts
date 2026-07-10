@@ -5,6 +5,9 @@ import { servicesData } from "@/lib/services-data";
 const BASE_URL = "https://www.dadparvaran.com";
 const locales = ["fa", "en"];
 
+// Regenerate at most once per day — the law-article set is large (~9k nodes).
+export const revalidate = 86400;
+
 const db = new PrismaClient();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -120,18 +123,72 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let teamEntries: MetadataRoute.Sitemap = [];
   try {
     const members = await db.teamMember.findMany({
-      where: { isActive: true },
-      select: { slug: true },
+      where: { isActive: true, status: "APPROVED" },
+      select: { id: true },
     });
     teamEntries = locales.flatMap((locale) =>
       members.map((m) => ({
-        url: `${BASE_URL}/${locale}/lawyers/${m.slug}`,
+        url: `${BASE_URL}/${locale}/lawyers/${m.id}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.6,
         alternates: {
           languages: Object.fromEntries(
-            locales.map((l) => [l, `${BASE_URL}/${l}/lawyers/${m.slug}`])
+            locales.map((l) => [l, `${BASE_URL}/${l}/lawyers/${m.id}`])
+          ),
+        },
+      }))
+    );
+  } catch {}
+
+  // Dynamic: individual law articles (مواد قانون) — /laws/{lawSlug}/{articleSlug}
+  let lawArticleEntries: MetadataRoute.Sitemap = [];
+  try {
+    const lawNodes = await db.legalNode.findMany({
+      where: { type: "LAW" },
+      select: { id: true, slug: true },
+    });
+    const lawSlugById = new Map(lawNodes.map((l) => [l.id, l.slug]));
+
+    const articleNodes = await db.legalNode.findMany({
+      where: { type: "ARTICLE", lawId: { not: null } },
+      select: { slug: true, lawId: true, updatedAt: true },
+    });
+
+    lawArticleEntries = locales.flatMap((locale) =>
+      articleNodes.flatMap((a) => {
+        const lawSlug = a.lawId != null ? lawSlugById.get(a.lawId) : undefined;
+        if (!lawSlug) return [];
+        return [
+          {
+            url: `${BASE_URL}/${locale}/laws/${lawSlug}/${a.slug}`,
+            lastModified: a.updatedAt,
+            changeFrequency: "yearly" as const,
+            priority: 0.6,
+            alternates: {
+              languages: Object.fromEntries(
+                locales.map((l) => [l, `${BASE_URL}/${l}/laws/${lawSlug}/${a.slug}`])
+              ),
+            },
+          },
+        ];
+      })
+    );
+  } catch {}
+
+  // Dynamic: tags — /tags/{tagSlug}
+  let tagEntries: MetadataRoute.Sitemap = [];
+  try {
+    const tags = await db.tag.findMany({ select: { slug: true } });
+    tagEntries = locales.flatMap((locale) =>
+      tags.map((t) => ({
+        url: `${BASE_URL}/${locale}/tags/${t.slug}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: 0.5,
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map((l) => [l, `${BASE_URL}/${l}/tags/${t.slug}`])
           ),
         },
       }))
@@ -144,6 +201,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articleEntries,
     ...calcEntries,
     ...lawEntries,
+    ...lawArticleEntries,
+    ...tagEntries,
     ...teamEntries,
   ];
 }

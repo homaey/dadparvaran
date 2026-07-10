@@ -188,7 +188,7 @@ export default async function LegalArticlePage({
               {relatedTeamMembers.map((member) => (
                 <Link
                   key={member.id}
-                  href={`/${locale}/team/${member.slug}`}
+                  href={`/${locale}/lawyers/${member.id}`}
                   className="flex items-center gap-4 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold">

@@ -9,7 +9,6 @@ export function getLegalServiceSchema(locale: string) {
       : "Specialized legal services with over 20 years of experience",
     url: `https://www.dadparvaran.com/${locale}`,
     telephone: "+986191010285",
-    email: "info@legalfirm.ir",
     address: {
       "@type": "PostalAddress",
       streetAddress: isFA
@@ -71,7 +70,6 @@ export function getLocalBusinessSchema(locale: string) {
     name: branch.name,
     url: `https://www.dadparvaran.com/${locale}`,
     telephone: "+986191010285",
-    email: "info@legalfirm.ir",
     address: {
       "@type": "PostalAddress",
       streetAddress: branch.street,
@@ -168,9 +166,11 @@ export function getArticleSchema(article: {
   author: string;
   publishedAt?: string;
   datePublished?: string;
+  dateModified?: string;
   image?: string;
   url: string;
 }) {
+  const datePublished = article.publishedAt ?? article.datePublished;
   return {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -180,8 +180,10 @@ export function getArticleSchema(article: {
       "@type": "Person",
       name: article.author,
     },
-    datePublished: article.publishedAt ?? article.datePublished,
-    image: article.image,
+    datePublished,
+    dateModified: article.dateModified ?? datePublished,
+    // Article rich results require an image — fall back to the site OG image.
+    image: article.image ?? "https://www.dadparvaran.com/og-image.jpg",
     url: article.url,
     publisher: {
       "@type": "Organization",

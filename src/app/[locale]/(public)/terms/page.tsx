@@ -89,7 +89,7 @@ export default async function TermsPage({
         {
           title: "۱۰. تماس",
           content:
-            "در صورت هرگونه سؤال درباره شرایط استفاده، با شماره ۰۶۱-۹۱۰۱۰۲۸۵ یا ایمیل info@legalfirm.ir تماس بگیرید.",
+            "در صورت هرگونه سؤال درباره شرایط استفاده، با شماره ۰۶۱-۹۱۰۱۰۲۸۵ تماس بگیرید.",
         },
       ]
     : [
@@ -141,7 +141,7 @@ export default async function TermsPage({
         {
           title: "10. Contact",
           content:
-            "If you have any questions about these Terms of Service, please contact us at +98 61 9101 0285 or email info@legalfirm.ir.",
+            "If you have any questions about these Terms of Service, please contact us at +98 61 9101 0285.",
         },
       ];
 

@@ -263,7 +263,7 @@ export default async function FormsPage({ params }: { params: Promise<{ locale: 
                         )}
                       </div>
                       <Link
-                        href={`/${locale}/lawyers/${lawyer.slug}`}
+                        href={`/${locale}/lawyers/${lawyer.id}`}
                         className="font-bold text-white hover:text-gold-300 transition-colors text-sm"
                       >
                         {isRTL ? lawyer.nameFA : lawyer.nameEN}

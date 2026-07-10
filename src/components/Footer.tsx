@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Phone, Mail, MapPin, Instagram, Linkedin, Twitter } from "lucide-react";
+import { Phone, MapPin, Instagram, Linkedin, Twitter } from "lucide-react";
 
 export default function Footer() {
   const t = useTranslations("footer");
@@ -101,12 +101,6 @@ export default function Footer() {
                 <Phone className="w-4 h-4 text-gold-400 shrink-0" />
                 <a href="tel:+986191010285" className="text-gray-400 hover:text-gold-400 text-sm transition-colors">
                   {tContact("phoneValue")}
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-gold-400 shrink-0" />
-                <a href="mailto:info@legalfirm.ir" className="text-gray-400 hover:text-gold-400 text-sm transition-colors">
-                  {tContact("emailValue")}
                 </a>
               </li>
             </ul>

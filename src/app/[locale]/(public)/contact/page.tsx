@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MapPin, Phone, Mail, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Clock, CheckCircle2 } from "lucide-react";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
@@ -22,7 +22,6 @@ export default function ContactPage() {
   const contactItems = [
     { icon: MapPin, label: t("address"), value: t("addressValue") },
     { icon: Phone, label: t("phone"), value: t("phoneValue"), href: "tel:+986191010285" },
-    { icon: Mail, label: t("email"), value: t("emailValue"), href: "mailto:info@legalfirm.ir" },
     { icon: Clock, label: t("hours"), value: t("hoursValue") },
   ];
 

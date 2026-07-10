@@ -64,7 +64,7 @@ export default async function PrivacyPage({
         {
           title: "۵. حقوق شما",
           content:
-            "شما حق دسترسی، اصلاح و حذف اطلاعات شخصی خود را دارید. برای اعمال این حقوق، می‌توانید از طریق صفحه تماس با ما یا ایمیل info@legalfirm.ir با ما ارتباط برقرار کنید.",
+            "شما حق دسترسی، اصلاح و حذف اطلاعات شخصی خود را دارید. برای اعمال این حقوق، می‌توانید از طریق صفحه تماس با ما با ما ارتباط برقرار کنید.",
         },
         {
           title: "۶. تغییرات در سیاست حریم خصوصی",
@@ -74,7 +74,7 @@ export default async function PrivacyPage({
         {
           title: "۷. تماس با ما",
           content:
-            "در صورت هرگونه سؤال درباره سیاست حفظ حریم خصوصی، لطفاً با شماره ۰۶۱-۹۱۰۱۰۲۸۵ یا ایمیل info@legalfirm.ir تماس بگیرید.",
+            "در صورت هرگونه سؤال درباره سیاست حفظ حریم خصوصی، لطفاً با شماره ۰۶۱-۹۱۰۱۰۲۸۵ تماس بگیرید.",
         },
       ]
     : [
@@ -101,7 +101,7 @@ export default async function PrivacyPage({
         {
           title: "5. Your Rights",
           content:
-            "You have the right to access, correct, and delete your personal information. To exercise these rights, please contact us through our contact page or email info@legalfirm.ir.",
+            "You have the right to access, correct, and delete your personal information. To exercise these rights, please contact us through our contact page.",
         },
         {
           title: "6. Changes to Privacy Policy",
@@ -111,7 +111,7 @@ export default async function PrivacyPage({
         {
           title: "7. Contact Us",
           content:
-            "If you have any questions about this Privacy Policy, please contact us at +98 61 9101 0285 or email info@legalfirm.ir.",
+            "If you have any questions about this Privacy Policy, please contact us at +98 61 9101 0285.",
         },
       ];
 

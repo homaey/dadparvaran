@@ -3,6 +3,10 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default async function Layout({
   children,
   params,

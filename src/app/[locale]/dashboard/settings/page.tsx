@@ -183,7 +183,7 @@ export default function SettingsPage() {
               {isRTL ? "اطلاعات تماس" : "Contact Information"}
             </h2>
             <Field label={isRTL ? "شماره تلفن" : "Phone"} value={data.contact_phone ?? ""} onChange={(v) => set("contact_phone", v)} placeholder="+98 21 XXXX XXXX" dir="ltr" />
-            <Field label={isRTL ? "ایمیل" : "Email"} value={data.contact_email ?? ""} onChange={(v) => set("contact_email", v)} placeholder="info@legalfirm.ir" dir="ltr" />
+            <Field label={isRTL ? "ایمیل" : "Email"} value={data.contact_email ?? ""} onChange={(v) => set("contact_email", v)} placeholder="info@dadparvaran.com" dir="ltr" />
             <Field label={isRTL ? "آدرس (فارسی)" : "Address (FA)"} value={data.contact_address_fa ?? ""} onChange={(v) => set("contact_address_fa", v)} textarea placeholder="تهران، خیابان..." />
             <Field label={isRTL ? "آدرس (انگلیسی)" : "Address (EN)"} value={data.contact_address_en ?? ""} onChange={(v) => set("contact_address_en", v)} textarea placeholder="Tehran, ..." />
           </>

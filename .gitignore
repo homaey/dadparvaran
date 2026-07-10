@@ -28,3 +28,6 @@ _reference/
 *.log
 nul
 seo-plan/
+
+# graphify knowledge-graph output (tool artifact)
+graphify-out/

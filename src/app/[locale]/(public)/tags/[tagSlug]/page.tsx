@@ -125,7 +125,7 @@ export default async function TagPage({
               {teamMembers.map((member) => (
                 <Link
                   key={member.id}
-                  href={`/${locale}/team/${member.slug}`}
+                  href={`/${locale}/lawyers/${member.id}`}
                   className="flex items-center gap-4 bg-white rounded-xl border border-gray-100 p-5 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer"
                 >
                   <div className="w-14 h-14 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold text-lg shrink-0">

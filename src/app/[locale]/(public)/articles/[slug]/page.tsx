@@ -72,6 +72,7 @@ export default async function ArticlePage({ params }: Props) {
     description: article.excerpt ?? "",
     author: isRTL ? article.author.nameFA : article.author.nameEN,
     publishedAt: article.publishedAt?.toISOString() ?? article.createdAt.toISOString(),
+    dateModified: article.updatedAt.toISOString(),
     url: `https://www.dadparvaran.com/${locale}/articles/${slug}`,
     image: article.coverImage ?? undefined,
   });
