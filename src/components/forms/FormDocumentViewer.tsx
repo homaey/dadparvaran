@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Printer, Download, Loader2 } from "lucide-react";
 
 type Props = {
@@ -238,21 +238,10 @@ const FORM_STYLES = `
     }
   }
 
-  @media screen and (max-width: 900px) {
-    .page {
-      transform: scale(0.6);
-      transform-origin: top center;
-      margin-bottom: -120mm;
-    }
-  }
-
-  @media screen and (min-width: 901px) and (max-width: 1200px) {
-    .page {
-      transform: scale(0.82);
-      transform-origin: top center;
-      margin-bottom: -50mm;
-    }
-  }
+  /* Screen preview is scaled to fit its container via JS (see fitToWidth in
+     FormDocumentViewer) so the A4 box always fits any viewport width without
+     horizontal overflow. No CSS transform scaling here — a CSS transform does
+     not shrink the layout box and would break both the preview and the PDF. */
 
   /* Print styles */
   @page {
@@ -295,9 +284,55 @@ ${content}
 </body>
 </html>`;
 
+// A4 width (210mm) in CSS pixels at 96dpi.
+const A4_WIDTH_PX = 794;
+
 export default function FormDocumentViewer({ content, titleFA, isRTL }: Props) {
   const docRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState(false);
+
+  // Scale the fixed-width A4 page down to fit the preview container on any
+  // screen, and reserve the correct (scaled) height so nothing overflows or
+  // leaves a gap. Re-runs on container resize and after fonts settle.
+  useEffect(() => {
+    const container = previewRef.current;
+    const wrap = wrapRef.current;
+    if (!container || !wrap) return;
+
+    const fit = () => {
+      const page = wrap.querySelector(".page") as HTMLElement | null;
+      if (!page) return;
+      const cs = getComputedStyle(container);
+      const padX = parseFloat(cs.paddingLeft || "0") + parseFloat(cs.paddingRight || "0");
+      const available = container.clientWidth - padX;
+      const scale = Math.min(1, available / A4_WIDTH_PX);
+      // The A4 page (width 794px) is wider than the wrap on small screens.
+      // In RTL its box right-aligns, so scale from the top-right corner (top-left
+      // for LTR) to keep the scaled document inside the wrap. Kill the page's
+      // `margin: 0 auto` so it pins to the wrap edge instead of overflowing.
+      page.style.margin = "0";
+      page.style.transformOrigin = isRTL ? "top right" : "top left";
+      page.style.transform = `scale(${scale})`;
+      // transform does not change the layout box, so reserve the scaled size.
+      wrap.style.width = `${A4_WIDTH_PX * scale}px`;
+      wrap.style.height = `${page.offsetHeight * scale}px`;
+    };
+
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(container);
+    const page = wrap.querySelector(".page") as HTMLElement | null;
+    if (page) ro.observe(page); // catch height changes when fonts/content reflow
+    const t1 = setTimeout(fit, 300);
+    const t2 = setTimeout(fit, 900);
+    return () => {
+      ro.disconnect();
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [content, isRTL]);
 
   const handlePrint = () => {
     const printWindow = window.open("", "_blank");
@@ -378,10 +413,10 @@ export default function FormDocumentViewer({ content, titleFA, isRTL }: Props) {
   return (
     <div>
       {/* Action Bar */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3 mb-6">
         <button
           onClick={handlePrint}
-          className="inline-flex items-center gap-2 bg-primary-900 hover:bg-primary-800 text-white px-5 py-2.5 rounded-xl font-medium transition-colors cursor-pointer"
+          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 bg-primary-900 hover:bg-primary-800 text-white px-5 py-3 sm:py-2.5 rounded-xl font-medium transition-colors cursor-pointer"
         >
           <Printer className="w-4 h-4" />
           {isRTL ? "چاپ" : "Print"}
@@ -389,7 +424,7 @@ export default function FormDocumentViewer({ content, titleFA, isRTL }: Props) {
         <button
           onClick={handleDownloadPDF}
           disabled={downloading}
-          className="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-primary-900 border border-gray-200 px-5 py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 bg-white hover:bg-gray-50 text-primary-900 border border-gray-200 px-5 py-3 sm:py-2.5 rounded-xl font-medium transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {downloading ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -402,20 +437,25 @@ export default function FormDocumentViewer({ content, titleFA, isRTL }: Props) {
         </button>
       </div>
 
-      {/* Document Preview */}
-      <div className="bg-[#e9eaee] rounded-2xl border border-gray-200 shadow-lg overflow-auto p-4 sm:p-8">
+      {/* Document Preview — the A4 page is scaled to fit this container width */}
+      <div
+        ref={previewRef}
+        className="bg-[#e9eaee] rounded-2xl border border-gray-200 shadow-lg overflow-hidden p-3 sm:p-8"
+      >
         <style dangerouslySetInnerHTML={{ __html: FORM_STYLES }} />
-        <div
-          ref={docRef}
-          dangerouslySetInnerHTML={{ __html: content }}
-          style={{
-            fontFamily: '"B Nazanin","BNazanin","Nazanin","IRANSans","Vazirmatn","Estedad",Tahoma,Arial,sans-serif',
-            direction: "rtl",
-            fontSize: "14px",
-            lineHeight: "1.75",
-            color: "#111",
-          }}
-        />
+        <div ref={wrapRef} className="mx-auto" style={{ overflow: "hidden" }}>
+          <div
+            ref={docRef}
+            dangerouslySetInnerHTML={{ __html: content }}
+            style={{
+              fontFamily: '"B Nazanin","BNazanin","Nazanin","IRANSans","Vazirmatn","Estedad",Tahoma,Arial,sans-serif',
+              direction: "rtl",
+              fontSize: "14px",
+              lineHeight: "1.75",
+              color: "#111",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
