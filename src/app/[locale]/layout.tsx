@@ -73,6 +73,9 @@ export async function generateMetadata({
       follow: true,
       googleBot: { index: true, follow: true },
     },
+    verification: {
+      google: process.env.GOOGLE_SITE_VERIFICATION,
+    },
     icons: {
       icon: "/logo.png",
       apple: "/logo.png",
