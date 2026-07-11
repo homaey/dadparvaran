@@ -83,7 +83,7 @@ export default async function ArticlesPage({
                     <div className="h-48 bg-gradient-to-br from-primary-800 to-primary-600 relative flex items-center justify-center">
                       {article.coverImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={article.coverImage} alt={article.title} className="w-full h-full object-cover" />
+                        <img src={article.coverImage} alt={article.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       ) : (
                         <BookOpen className="w-12 h-12 text-white/30" />
                       )}
@@ -105,7 +105,7 @@ export default async function ArticlesPage({
                         <div className="flex items-center gap-1.5">
                           {article.author.photoUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={article.author.photoUrl} alt="" className="w-5 h-5 rounded-full object-cover" />
+                            <img src={article.author.photoUrl} alt={isRTL ? article.author.nameFA : article.author.nameEN} loading="lazy" decoding="async" className="w-5 h-5 rounded-full object-cover" />
                           ) : (
                             <div className="w-5 h-5 rounded-full bg-primary-100 flex items-center justify-center text-[9px] font-bold text-primary-700">
                               {(isRTL ? article.author.nameFA : article.author.nameEN).charAt(0)}

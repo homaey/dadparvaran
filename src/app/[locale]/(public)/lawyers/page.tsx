@@ -93,7 +93,7 @@ export default async function LawyersPage({
                       <div className="w-24 h-24 rounded-2xl bg-primary-100 flex items-center justify-center text-primary-700 text-3xl font-bold shrink-0 mx-auto sm:mx-0 overflow-hidden">
                         {member.photoUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={member.photoUrl} alt={isRTL ? member.nameFA : member.nameEN} className="w-full h-full object-cover" />
+                          <img src={member.photoUrl} alt={isRTL ? member.nameFA : member.nameEN} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : (
                           member.nameFA.charAt(0)
                         )}

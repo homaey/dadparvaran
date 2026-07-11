@@ -155,7 +155,7 @@ export default async function AboutPage({
                   <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-primary-700 overflow-hidden">
                     {member.photoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={member.photoUrl} alt={isRTL ? member.nameFA : member.nameEN} className="w-full h-full object-cover" />
+                      <img src={member.photoUrl} alt={isRTL ? member.nameFA : member.nameEN} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                     ) : (
                       (isRTL ? member.nameFA : member.nameEN).charAt(0)
                     )}

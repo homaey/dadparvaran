@@ -115,7 +115,7 @@ export default async function ArticlePage({ params }: Props) {
               <div className="flex items-center gap-2">
                 {article.author.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={article.author.photoUrl} alt="" className="w-8 h-8 rounded-full object-cover border border-white/20" />
+                  <img src={article.author.photoUrl} alt={isRTL ? article.author.nameFA : article.author.nameEN} className="w-8 h-8 rounded-full object-cover border border-white/20" />
                 ) : (
                   <div className="w-8 h-8 bg-primary-700 rounded-full flex items-center justify-center text-xs font-bold text-white">
                     {(isRTL ? article.author.nameFA : article.author.nameEN).charAt(0)}
@@ -221,7 +221,7 @@ export default async function ArticlePage({ params }: Props) {
                       return (
                         <figure key={idx} className="my-8">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={block.src} alt={block.alt || ""} className="w-full rounded-2xl shadow-sm" />
+                          <img src={block.src} alt={block.alt || ""} loading="lazy" decoding="async" className="w-full rounded-2xl shadow-sm" />
                           {block.caption && (
                             <figcaption className="text-center text-sm text-gray-500 mt-3 italic">{block.caption}</figcaption>
                           )}
@@ -266,7 +266,7 @@ export default async function ArticlePage({ params }: Props) {
                 <div className="flex items-center gap-3 mb-3">
                   {article.author.photoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={article.author.photoUrl} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
+                    <img src={article.author.photoUrl} alt={isRTL ? article.author.nameFA : article.author.nameEN} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover border-2 border-gray-200" />
                   ) : (
                     <div className="w-10 h-10 bg-primary-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
                       {(isRTL ? article.author.nameFA : article.author.nameEN).charAt(0)}
