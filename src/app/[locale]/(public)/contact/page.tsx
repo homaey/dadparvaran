@@ -14,9 +14,28 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    setSubmitted(true);
+
+    const form = e.target as HTMLFormElement;
+    const body = {
+      name: (form.elements.namedItem("name") as HTMLInputElement).value,
+      phone: (form.elements.namedItem("phone") as HTMLInputElement).value || undefined,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+    };
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      setSubmitted(true);
+    } catch {
+      alert(isRTL ? "خطا در ارسال پیام. لطفاً دوباره تلاش کنید." : "Failed to send. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const contactItems = [
@@ -106,6 +125,7 @@ export default function ContactPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t("form.name")}</label>
                       <input
                         type="text"
+                        name="name"
                         required
                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-colors bg-white"
                       />
@@ -114,6 +134,7 @@ export default function ContactPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t("form.phone")}</label>
                       <input
                         type="tel"
+                        name="phone"
                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-colors bg-white"
                       />
                     </div>
@@ -122,6 +143,7 @@ export default function ContactPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t("form.email")}</label>
                     <input
                       type="email"
+                      name="email"
                       required
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-colors bg-white"
                     />
@@ -129,6 +151,7 @@ export default function ContactPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">{t("form.message")}</label>
                     <textarea
+                      name="message"
                       required
                       rows={5}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-colors bg-white resize-none"

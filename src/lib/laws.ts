@@ -35,7 +35,15 @@ export async function getLawTree(lawId: number) {
     }
   }
 
-  return roots;
+  function pruneEmptySections(nodes: TreeNode[]): TreeNode[] {
+    return nodes.filter((n) => {
+      n.children = pruneEmptySections(n.children);
+      if (n.type === "SECTION" && n.children.length === 0) return false;
+      return true;
+    });
+  }
+
+  return pruneEmptySections(roots);
 }
 
 export async function getLegalArticleBySlug(lawSlug: string, articleSlug: string) {

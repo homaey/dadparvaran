@@ -228,6 +228,18 @@ model Holiday {
   @@unique([jalaliYear, jalaliMonth, jalaliDay])
 }
 
+// ─── پیام‌های تماس ──────────────────────────────────────────────────────────
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 // ─── تنظیمات سایت ──────────────────────────────────────────────────────────
 
 model SiteSettings {

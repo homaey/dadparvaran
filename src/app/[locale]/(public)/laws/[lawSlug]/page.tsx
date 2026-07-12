@@ -5,6 +5,7 @@ import { ChevronLeft, Calendar, Building2 } from "lucide-react";
 import { getLawBySlug, getLawTree, getTagsForLegalNode } from "@/lib/laws";
 import type { Metadata } from "next";
 import { toPersianDigits } from "@/lib/utils";
+import LawTreeClient from "./LawTreeClient";
 
 export async function generateMetadata({
   params,
@@ -36,6 +37,54 @@ export async function generateMetadata({
   };
 }
 
+interface TreeNode {
+  id: number;
+  type: string;
+  title: string;
+  slug: string;
+  articleNumber: string | null;
+  content: string | null;
+  children: TreeNode[];
+}
+
+function flattenTree(nodes: TreeNode[]): { sections: any[]; articles: any[] } {
+  const sections: { id: number; title: string; depth: number; articleCount: number }[] = [];
+  const articles: { id: number; title: string; slug: string; content: string | null; sectionId: number; articleNumber: string | null }[] = [];
+
+  function walk(nodes: TreeNode[], depth: number, parentSectionId: number) {
+    for (const node of nodes) {
+      if (node.type === "SECTION") {
+        const sectionId = node.id;
+        let articleCount = 0;
+        function countArticles(n: TreeNode): number {
+          let c = 0;
+          for (const child of n.children) {
+            if (child.type === "ARTICLE") c++;
+            else c += countArticles(child);
+          }
+          return c;
+        }
+        articleCount = countArticles(node);
+
+        sections.push({ id: sectionId, title: node.title, depth, articleCount });
+        walk(node.children, depth + 1, sectionId);
+      } else if (node.type === "ARTICLE") {
+        articles.push({
+          id: node.id,
+          title: node.title,
+          slug: node.slug,
+          content: node.content,
+          sectionId: parentSectionId,
+          articleNumber: node.articleNumber,
+        });
+      }
+    }
+  }
+
+  walk(nodes, 0, 0);
+  return { sections, articles };
+}
+
 export default async function LawDetailPage({
   params,
 }: {
@@ -49,8 +98,9 @@ export default async function LawDetailPage({
   const law = await getLawBySlug(decodedSlug);
   if (!law) notFound();
 
-  const tree = await getLawTree(law.id);
+  const tree = await getLawTree(law.id) as TreeNode[];
   const tags = await getTagsForLegalNode(law.id);
+  const { sections, articles } = flattenTree(tree);
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"} className="py-24 min-h-screen">
@@ -65,7 +115,7 @@ export default async function LawDetailPage({
         </nav>
 
         {/* Header */}
-        <div dir="rtl" className="bg-white border border-gray-200 px-6 sm:px-8 py-6 font-fa">
+        <div dir="rtl" className="bg-white border border-gray-200 px-6 sm:px-8 py-6 font-fa rounded-t-2xl">
           <h1 className="text-2xl sm:text-3xl font-bold text-primary-900 mb-4 font-fa-display">
             {toPersianDigits(law.title)}
           </h1>
@@ -83,6 +133,9 @@ export default async function LawDetailPage({
                 <span>{t("adoptionAuthority")}: {law.adoptionAuthority}</span>
               </div>
             )}
+            <div className="flex items-center gap-2 text-primary-600 font-medium">
+              {toPersianDigits(`${articles.length} ماده`)}
+            </div>
           </div>
 
           {tags.length > 0 && (
@@ -100,62 +153,13 @@ export default async function LawDetailPage({
           )}
         </div>
 
-        {/* Full law text */}
-        <div dir="rtl" className="bg-white border-x border-b border-gray-200 px-6 sm:px-8 font-fa">
-          {(() => {
-            const sections = tree.filter((n) => n.type === "SECTION");
-            const directArticles = tree.filter((n) => n.type === "ARTICLE");
-
-            const renderArticleLink = (article: (typeof tree)[number]) => (
-              <section
-                key={article.id}
-                id={article.slug}
-                className="py-5 border-b border-gray-200 last:border-b-0"
-              >
-                <Link
-                  href={`/${locale}/laws/${decodedSlug}/${article.slug}`}
-                  className="inline-block text-primary-600 hover:text-primary-800 font-semibold mb-3"
-                >
-                    {toPersianDigits(article.title)}
-                </Link>
-                {article.content && (
-                  <p className="whitespace-pre-wrap text-gray-900 text-base sm:text-lg leading-[2.15] text-justify">
-                    {toPersianDigits(article.content)}
-                  </p>
-                )}
-              </section>
-            );
-
-            const renderSection = (section: (typeof tree)[number]) => (
-              <section key={section.id}>
-                <div className="py-5 border-b border-gray-200">
-                  <h2 className="text-primary-600 text-lg sm:text-xl font-semibold font-fa-display">
-                    {toPersianDigits(section.title)}
-                  </h2>
-                  {section.content && (
-                    <p className="mt-3 whitespace-pre-wrap text-gray-900 text-base sm:text-lg leading-[2.15] text-justify">
-                      {toPersianDigits(section.content)}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  {section.children.map((child) =>
-                    child.type === "SECTION" ? renderSection(child) : renderArticleLink(child)
-                  )}
-                </div>
-              </section>
-            );
-
-            return (
-              <>
-                {directArticles.length > 0 && (
-                  <div>{directArticles.map(renderArticleLink)}</div>
-                )}
-                {sections.map(renderSection)}
-              </>
-            );
-          })()}
-        </div>
+        {/* Client-side interactive law tree */}
+        <LawTreeClient
+          sections={sections}
+          articles={articles}
+          lawSlug={decodedSlug}
+          locale={locale}
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import {
@@ -297,6 +297,12 @@ function BlockEditor({ block, onChange, onRemove, onMoveUp, onMoveDown, isFirst,
   );
 }
 
+interface TeamMemberOption {
+  id: number;
+  nameFA: string;
+  nameEN: string;
+}
+
 export default function NewArticlePage() {
   const locale = useLocale();
   const router = useRouter();
@@ -307,6 +313,7 @@ export default function NewArticlePage() {
   const [error, setError] = useState("");
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMemberOption[]>([]);
   const [form, setForm] = useState({
     title: "",
     slug: "",
@@ -314,7 +321,20 @@ export default function NewArticlePage() {
     coverImage: "",
     readTimeMin: 5,
     tags: "",
+    authorId: "",
   });
+
+  useEffect(() => {
+    fetch("/api/admin/lawyers?status=APPROVED")
+      .then((r) => r.json())
+      .then((d) => {
+        const list = d.members ?? d;
+        if (Array.isArray(list)) {
+          setTeamMembers(list.map((m: any) => ({ id: m.id, nameFA: m.nameFA, nameEN: m.nameEN })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   function toSlug(str: string) {
     return str.trim().replace(/\s+/g, "-").replace(/[^؀-ۿa-zA-Z0-9-]/g, "");
@@ -384,15 +404,19 @@ export default function NewArticlePage() {
       return;
     }
 
+    const payload: any = {
+      ...form,
+      status,
+      blocks: serializeBlocks(),
+      tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
+    };
+    if (form.authorId) payload.authorId = parseInt(form.authorId);
+    else delete payload.authorId;
+
     const res = await fetch("/api/articles", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        status,
-        blocks: serializeBlocks(),
-        tags: form.tags.split(",").map(t => t.trim()).filter(Boolean),
-      }),
+      body: JSON.stringify(payload),
     });
 
     setLoading(false);
@@ -526,6 +550,23 @@ export default function NewArticlePage() {
         <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
             <h2 className="font-semibold text-gray-900">{isRTL ? "تنظیمات" : "Settings"}</h2>
+            {teamMembers.length > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">{isRTL ? "نویسنده" : "Author"}</label>
+                <select
+                  value={form.authorId}
+                  onChange={(e) => setForm((p) => ({ ...p, authorId: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 bg-white"
+                >
+                  <option value="">{isRTL ? "نویسنده پیش‌فرض (خودم)" : "Default (me)"}</option>
+                  {teamMembers.map((m) => (
+                    <option key={m.id} value={m.id}>
+                      {isRTL ? m.nameFA : m.nameEN}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">{isRTL ? "تصویر کاور (URL)" : "Cover Image (URL)"}</label>
               <input type="url" value={form.coverImage} onChange={f("coverImage")} placeholder="https://..." className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500" />

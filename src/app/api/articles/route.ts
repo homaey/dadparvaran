@@ -54,6 +54,7 @@ const createSchema = z.object({
   readTimeMin: z.number().default(5),
   tags: z.array(z.string()).default([]),
   status: z.enum(["DRAFT", "PUBLISHED"]).default("DRAFT"),
+  authorId: z.number().int().positive().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -81,16 +82,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "این slug قبلاً استفاده شده است" }, { status: 409 });
     }
 
-    if (!teamMemberId) {
+    const resolvedAuthorId = (role === "ADMIN" && data.authorId) ? data.authorId : teamMemberId;
+
+    if (!resolvedAuthorId) {
       return NextResponse.json({ error: "پروفایل یافت نشد" }, { status: 400 });
     }
 
-    const { categoryId, tags, blocks, ...rest } = data;
+    const { categoryId, tags, blocks, authorId: _aid, ...rest } = data;
     const article = await db.article.create({
       data: {
         ...rest,
         blocks: JSON.stringify(blocks),
-        author: { connect: { id: teamMemberId } },
+        author: { connect: { id: resolvedAuthorId } },
         publishedAt: data.status === "PUBLISHED" ? new Date() : null,
         ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
       },

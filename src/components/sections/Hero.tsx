@@ -69,7 +69,7 @@ export default async function Hero({ locale }: { locale: string }) {
                 <Arrow className="w-5 h-5" />
               </Link>
               <Link
-                href={`/${locale}/services`}
+                href={`/${locale}/laws`}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all backdrop-blur-sm"
               >
                 {t("ctaSecondary")}

@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { useLocale } from "next-intl";
 import {
   Scale, LayoutDashboard, FileText, Users,
-  Settings, LogOut, Menu, X, Bell,
+  Settings, LogOut, Menu, X, Bell, Mail,
   BookOpen, ShieldCheck, Tag, Landmark, Calculator,
   TrendingUp, Clock, CalendarDays,
 } from "lucide-react";
@@ -36,6 +36,7 @@ export default function DashboardLayout({ children, role, userName }: Props) {
     ],
     ADMIN: [
       { href: base, icon: LayoutDashboard, label: isRTL ? "داشبورد" : "Dashboard" },
+      { href: `${base}/messages`, icon: Mail, label: isRTL ? "پیام‌ها" : "Messages" },
       { href: `${base}/lawyers`, icon: ShieldCheck, label: isRTL ? "تأیید وکلا" : "Lawyer Approval" },
       { href: `${base}/articles`, icon: BookOpen, label: isRTL ? "مقالات" : "Articles" },
       { href: `${base}/laws`, icon: Landmark, label: isRTL ? "مدیریت قوانین" : "Laws" },
