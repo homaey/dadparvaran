@@ -93,7 +93,7 @@ export default async function HomePage({
       <Hero locale={locale} />
       <Services />
       <LawyersSection members={teamMembers} />
-      <ArticlesSection articles={articlesData} />
+      {locale === "fa" && <ArticlesSection articles={articlesData} />}
       <ContactLawyersCTA />
       <LawyerCTASection />
       <FAQSection />

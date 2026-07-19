@@ -5,19 +5,28 @@ import { shouldNoindexEnglish } from "./lib/i18n-pages";
 
 const intlMiddleware = createMiddleware(routing);
 
+// مسیرهایی که محتوای اصلی‌شان فقط فارسی است — ریدایرکت به /fa
+const FA_ONLY_PREFIXES = ["/en/articles", "/en/laws", "/en/forms", "/en/tags"];
+
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // ریشه‌ی سایت → نسخه فارسی (302 تا در آینده بتوان منطق ترجیح کاربر اضافه کرد)
   if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/fa";
     return NextResponse.redirect(url, 302);
   }
 
+  // صفحات انگلیسی بدون ترجمه → ریدایرکت 302 به معادل فارسی
+  if (FA_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/en/, "/fa");
+    return NextResponse.redirect(url, 302);
+  }
+
   const response = intlMiddleware(request);
 
-  // صفحات انگلیسی بدون محتوای کامل → noindex
+  // صفحات انگلیسی بدون محتوای کامل → noindex (برای مسیرهای باقی‌مانده)
   const localeMatch = pathname.match(/^\/(fa|en)(\/.*)?$/);
   if (localeMatch) {
     const locale = localeMatch[1];
