@@ -51,9 +51,12 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { href: `/${locale}`, label: isRTL ? "صفحه اصلی" : "Home" },
-                { href: `/${locale}/laws`, label: isRTL ? "قوانین" : "Laws" },
-                { href: `/${locale}/articles`, label: isRTL ? "مقالات" : "Articles" },
+                ...(isRTL ? [
+                  { href: `/${locale}/laws`, label: "قوانین" },
+                  { href: `/${locale}/articles`, label: "مقالات" },
+                ] : []),
                 { href: `/${locale}/lawyers`, label: isRTL ? "تیم ما" : "Our Team" },
+                { href: `/${locale}/services`, label: isRTL ? "خدمات" : "Services" },
               ].map((link) => (
                 <li key={link.href}>
                   <Link
@@ -73,7 +76,9 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { href: `/${locale}/calculators`, label: isRTL ? "ماشین‌حساب‌ها" : "Calculators" },
-                { href: `/${locale}/forms`, label: isRTL ? "اوراق قضایی" : "Legal Forms" },
+                ...(isRTL ? [
+                  { href: `/${locale}/forms`, label: "اوراق قضایی" },
+                ] : []),
                 { href: `/${locale}/about`, label: isRTL ? "درباره ما" : "About Us" },
                 { href: `/${locale}/contact`, label: isRTL ? "تماس با ما" : "Contact Us" },
               ].map((link) => (

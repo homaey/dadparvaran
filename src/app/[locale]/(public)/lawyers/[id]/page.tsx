@@ -155,11 +155,11 @@ export default async function LawyerProfilePage({ params }: Props) {
                 </div>
               )}
 
-              {member.articles.length > 0 && (
+              {isRTL && member.articles.length > 0 && (
                 <div>
                   <h2 className="text-xl font-bold text-primary-900 mb-4 flex items-center gap-2">
                     <BookOpen className="w-5 h-5 text-primary-500" />
-                    {isRTL ? "مقالات اخیر" : "Recent Articles"}
+                    مقالات اخیر
                   </h2>
                   <div className="space-y-4">
                     {member.articles.map((a) => (
@@ -173,7 +173,7 @@ export default async function LawyerProfilePage({ params }: Props) {
                           <p className="font-medium text-gray-900 group-hover:text-primary-700 line-clamp-1">
                             {a.title}
                           </p>
-                          <p className="text-xs text-gray-400 mt-0.5">{a.readTimeMin} {isRTL ? "دقیقه مطالعه" : "min read"}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{a.readTimeMin} دقیقه مطالعه</p>
                         </div>
                       </Link>
                     ))}

@@ -34,16 +34,17 @@ export default function Navbar() {
 
   const solid = !hasDarkHero || scrolled;
 
-  const navLinks = [
-    { href: `/${locale}`, label: t("home") },
-    { href: `/${locale}/laws`, label: t("laws") },
-    { href: `/${locale}/articles`, label: t("articles") },
-    { href: `/${locale}/lawyers`, label: t("team") },
-    { href: `/${locale}/calculators`, label: t("calculators") },
-    { href: `/${locale}/forms`, label: isRTL ? "اوراق قضایی" : "Legal Forms" },
-    { href: `/${locale}/about`, label: isRTL ? "درباره ما" : "About" },
-    { href: `/${locale}/contact`, label: t("contact") },
+  const allNavLinks = [
+    { href: `/${locale}`, label: t("home"), enOnly: false },
+    { href: `/${locale}/laws`, label: t("laws"), enOnly: false, faOnly: true },
+    { href: `/${locale}/articles`, label: t("articles"), enOnly: false, faOnly: true },
+    { href: `/${locale}/lawyers`, label: t("team"), enOnly: false },
+    { href: `/${locale}/calculators`, label: t("calculators"), enOnly: false },
+    { href: `/${locale}/forms`, label: isRTL ? "اوراق قضایی" : "Legal Forms", enOnly: false, faOnly: true },
+    { href: `/${locale}/about`, label: isRTL ? "درباره ما" : "About", enOnly: false },
+    { href: `/${locale}/contact`, label: t("contact"), enOnly: false },
   ];
+  const navLinks = allNavLinks.filter((l) => !(l.faOnly && locale === "en"));
 
   const otherLocale = locale === "fa" ? "en" : "fa";
   const pathWithoutLocale = pathname.replace(/^\/(fa|en)/, "") || "";

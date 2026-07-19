@@ -17,11 +17,11 @@ export default function middleware(request: NextRequest) {
     return NextResponse.redirect(url, 302);
   }
 
-  // صفحات انگلیسی بدون ترجمه → ریدایرکت 302 به معادل فارسی
+  // صفحات انگلیسی بدون ترجمه → ریدایرکت 301 به معادل فارسی
   if (FA_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.replace(/^\/en/, "/fa");
-    return NextResponse.redirect(url, 302);
+    return NextResponse.redirect(url, 301);
   }
 
   const response = intlMiddleware(request);
