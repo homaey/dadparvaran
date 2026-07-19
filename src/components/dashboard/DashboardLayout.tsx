@@ -9,13 +9,14 @@ import {
   Settings, LogOut, Menu, X, Bell, Mail,
   BookOpen, ShieldCheck, Tag, Landmark, Calculator,
   TrendingUp, Clock, CalendarDays,
+  Sparkles, ListChecks, BellRing, BarChart3, PenTool, Download,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface Props {
   children: React.ReactNode;
-  role: "LAWYER" | "ADMIN";
+  role: "LAWYER" | "ADMIN" | "CONTENT_CREATOR" | "LEGAL_REVIEWER";
   userName: string;
 }
 
@@ -28,10 +29,31 @@ export default function DashboardLayout({ children, role, userName }: Props) {
 
   const base = `/${locale}/dashboard`;
 
-  const navItems = {
+  const contentItems = [
+    { href: `${base}/content-strategy`, icon: CalendarDays, label: isRTL ? "تقویم محتوا" : "Content Calendar" },
+    { href: `${base}/content-workflow`, icon: ListChecks, label: isRTL ? "گردش کار محتوا" : "Content Workflow" },
+    { href: `${base}/content-prompts`, icon: FileText, label: isRTL ? "پرامپت‌های محتوا" : "Content Prompts" },
+    { href: `${base}/notifications`, icon: BellRing, label: isRTL ? "اعلان‌ها" : "Notifications" },
+    { href: `${base}/management-intelligence`, icon: BarChart3, label: isRTL ? "هوش مدیریتی" : "Management Intelligence" },
+  ];
+
+  const navItems: Record<string, typeof contentItems> = {
     LAWYER: [
       { href: base, icon: LayoutDashboard, label: isRTL ? "داشبورد" : "Dashboard" },
       { href: `${base}/articles`, icon: BookOpen, label: isRTL ? "مقالات" : "Articles" },
+      { href: `${base}/notifications`, icon: BellRing, label: isRTL ? "اعلان‌ها" : "Notifications" },
+      { href: `${base}/profile`, icon: Settings, label: isRTL ? "پروفایل" : "Profile" },
+    ],
+    CONTENT_CREATOR: [
+      { href: base, icon: LayoutDashboard, label: isRTL ? "داشبورد" : "Dashboard" },
+      { href: `${base}/articles`, icon: BookOpen, label: isRTL ? "مقالات" : "Articles" },
+      { href: `${base}/notifications`, icon: BellRing, label: isRTL ? "اعلان‌ها" : "Notifications" },
+      { href: `${base}/profile`, icon: Settings, label: isRTL ? "پروفایل" : "Profile" },
+    ],
+    LEGAL_REVIEWER: [
+      { href: base, icon: LayoutDashboard, label: isRTL ? "داشبورد" : "Dashboard" },
+      { href: `${base}/content-workflow`, icon: ListChecks, label: isRTL ? "بازبینی‌ها" : "Reviews" },
+      { href: `${base}/notifications`, icon: BellRing, label: isRTL ? "اعلان‌ها" : "Notifications" },
       { href: `${base}/profile`, icon: Settings, label: isRTL ? "پروفایل" : "Profile" },
     ],
     ADMIN: [
@@ -39,24 +61,29 @@ export default function DashboardLayout({ children, role, userName }: Props) {
       { href: `${base}/messages`, icon: Mail, label: isRTL ? "پیام‌ها" : "Messages" },
       { href: `${base}/lawyers`, icon: ShieldCheck, label: isRTL ? "تأیید وکلا" : "Lawyer Approval" },
       { href: `${base}/articles`, icon: BookOpen, label: isRTL ? "مقالات" : "Articles" },
+      ...contentItems,
       { href: `${base}/laws`, icon: Landmark, label: isRTL ? "مدیریت قوانین" : "Laws" },
       { href: `${base}/price-index`, icon: TrendingUp, label: isRTL ? "شاخص بها" : "Price Index" },
       { href: `${base}/diye-rate`, icon: Scale, label: isRTL ? "نرخ دیه" : "Diye Rates" },
       { href: `${base}/deadlines`, icon: Clock, label: isRTL ? "مهلت‌های قضایی" : "Deadlines" },
       { href: `${base}/holidays`, icon: CalendarDays, label: isRTL ? "تعطیلات رسمی" : "Holidays" },
       { href: `${base}/forms`, icon: FileText, label: isRTL ? "اوراق قضایی" : "Legal Forms" },
+      { href: `${base}/solh-import`, icon: Download, label: isRTL ? "واردسازی solh" : "Solh Import" },
       { href: `${base}/users`, icon: Users, label: isRTL ? "مدیریت کاربران" : "Users" },
       { href: `${base}/profile`, icon: Settings, label: isRTL ? "پروفایل" : "Profile" },
       { href: `${base}/settings`, icon: Settings, label: isRTL ? "تنظیمات" : "Settings" },
     ],
   };
 
-  const items = navItems[role];
+  const items = navItems[role] ?? navItems.LAWYER;
 
-  const roleBadge = {
+  const roleBadges: Record<string, { label: string; color: string }> = {
     LAWYER: { label: isRTL ? "وکیل" : "Lawyer", color: "bg-gold-100 text-gold-700" },
     ADMIN: { label: isRTL ? "ادمین" : "Admin", color: "bg-red-100 text-red-700" },
-  }[role];
+    CONTENT_CREATOR: { label: isRTL ? "تولیدکننده محتوا" : "Content Creator", color: "bg-blue-100 text-blue-700" },
+    LEGAL_REVIEWER: { label: isRTL ? "بازبین حقوقی" : "Legal Reviewer", color: "bg-emerald-100 text-emerald-700" },
+  };
+  const roleBadge = roleBadges[role] ?? roleBadges.LAWYER;
 
   const Sidebar = () => (
     <aside className={cn(

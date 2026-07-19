@@ -3,9 +3,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Clock, Tag, Calendar, ChevronRight, ChevronLeft, Eye, BookOpen, Phone } from "lucide-react";
 import { db } from "@/lib/db";
-import { getArticleSchema, getBreadcrumbSchema } from "@/lib/schema";
+import { getArticleSchema, getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
 import { getTagsForArticle } from "@/lib/team";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
+import { toWhatsAppLink } from "@/lib/whatsapp";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -85,10 +87,19 @@ export default async function ArticlePage({ params }: Props) {
 
   const blocks: any[] = JSON.parse(article.blocks || "[]");
 
+  // اگر مقاله بلوک faq داشته باشد، FAQPage schema هم تولید می‌شود (فقط از پرسش‌های قابل‌مشاهده).
+  const faqPairs = blocks
+    .filter((b) => b.type === "faq" && Array.isArray(b.items))
+    .flatMap((b) => b.items)
+    .filter((it: any) => it?.q && it?.a)
+    .map((it: any) => ({ question: it.q, answer: it.a }));
+  const faqSchema = faqPairs.length ? getFAQSchema(faqPairs) : null;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
+      {faqSchema && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />}
 
       <div dir={isRTL ? "rtl" : "ltr"}>
         <section className="bg-gradient-to-br from-primary-950 to-primary-800 pt-32 pb-16 text-white">
@@ -238,6 +249,26 @@ export default async function ArticlePage({ params }: Props) {
                           <span className="text-primary-700 text-sm font-semibold">{block.text}</span>
                         </Link>
                       );
+                    case "cta": {
+                      // href داخلی (مثل /services/…) اینجا زبان‌دار می‌شود. اگر خودِ داده اشتباهاً
+                      // پیشوند زبان (/fa یا /en) داشته باشد آن را می‌زداییم تا دوبار اضافه نشود.
+                      const rawHref = block.href ?? "";
+                      const isInternal = rawHref.startsWith("/");
+                      const href = isInternal
+                        ? `/${locale}${rawHref.replace(/^\/(fa|en)(?=\/|$)/, "")}`
+                        : (rawHref || `/${locale}/contact`);
+                      return (
+                        <div key={idx} className="my-8 flex flex-col items-center gap-3 rounded-2xl border border-gold-200 bg-gold-50/60 px-6 py-8 text-center">
+                          {block.content && <p className="text-primary-900 font-medium leading-8 text-[15px]">{block.content}</p>}
+                          <Link
+                            href={href ?? `/${locale}/contact`}
+                            className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-7 py-3.5 rounded-xl font-semibold transition-colors shadow-lg shadow-gold-500/25"
+                          >
+                            {block.text ?? "تماس با وکیل"}
+                          </Link>
+                        </div>
+                      );
+                    }
                     default:
                       return null;
                   }
@@ -279,13 +310,26 @@ export default async function ArticlePage({ params }: Props) {
                 </div>
                 <div className="flex flex-col gap-2">
                   {article.author.phone && (
-                    <a
-                      href={`tel:${article.author.phone}`}
-                      className="w-full flex items-center justify-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2.5 rounded-xl transition-colors font-semibold"
-                    >
-                      <Phone className="w-3.5 h-3.5" />
-                      {isRTL ? "تماس با وکیل" : "Call Lawyer"}
-                    </a>
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`tel:${article.author.phone}`}
+                        className="flex-1 flex items-center justify-center gap-1.5 bg-primary-700 hover:bg-primary-600 text-white text-xs px-3 py-2.5 rounded-xl transition-colors font-semibold"
+                      >
+                        <Phone className="w-3.5 h-3.5" />
+                        {isRTL ? "تماس" : "Call"}
+                      </a>
+                      {toWhatsAppLink(article.author.phone) && (
+                        <a
+                          href={toWhatsAppLink(article.author.phone)!}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 flex items-center justify-center gap-1.5 bg-[#25D366] hover:bg-[#1da851] text-white text-xs px-3 py-2.5 rounded-xl transition-colors font-semibold"
+                        >
+                          <WhatsAppIcon className="w-3.5 h-3.5" />
+                          {isRTL ? "واتساپ" : "WhatsApp"}
+                        </a>
+                      )}
+                    </div>
                   )}
                   <Link
                     href={`/${locale}/lawyers/${article.authorId}`}

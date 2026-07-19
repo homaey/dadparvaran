@@ -1,4 +1,5 @@
 import { NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
@@ -69,3 +70,23 @@ export const authOptions: NextAuthOptions = {
     },
   },
 };
+
+export type SessionUser = { userId: string; name: string; role: string; teamMemberId: number | null };
+
+export async function getCurrentUser(): Promise<SessionUser | null> {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) return null;
+  return {
+    userId: (session.user as any).id,
+    name: session.user.name ?? "",
+    role: (session.user as any).role,
+    teamMemberId: (session.user as any).teamMemberId ?? null,
+  };
+}
+
+export async function requireUser(roles?: string[]): Promise<SessionUser | null> {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  if (roles && !roles.includes(user.role)) return null;
+  return user;
+}

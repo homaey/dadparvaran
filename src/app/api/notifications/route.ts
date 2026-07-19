@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";import { authorize } from "@/lib/api";import { db } from "@/lib/db";
+export async function GET(){const auth=await authorize();if("error" in auth)return auth.error;const notifications=await db.notification.findMany({where:{userId:auth.session.userId,status:{in:["PENDING","SENT"]}},orderBy:{createdAt:"desc"},take:50});return NextResponse.json({notifications})}
+export async function PATCH(){const auth=await authorize();if("error" in auth)return auth.error;await db.notification.updateMany({where:{userId:auth.session.userId,status:{in:["PENDING","SENT"]}},data:{status:"READ",readAt:new Date()}});return NextResponse.json({ok:true})}

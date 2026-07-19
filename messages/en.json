@@ -130,6 +130,34 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Use"
   },
+  "content": {
+    "contentStrategy": {
+      "title": "Content Calendar",
+      "subtitle": "Manage content production calendar and publishing schedule",
+      "generateCta": "Create New Calendar",
+      "generateTitle": "AI-Powered Content Calendar",
+      "generateSubtitle": "Set the time range, article count, and goals to auto-generate a content calendar"
+    },
+    "contentWorkflow": {
+      "reviewQueueTitle": "Review Queue",
+      "assignedTitle": "My Tasks",
+      "hint": "Content tasks assigned to you",
+      "adminTitle": "Content Workflow",
+      "adminSubtitle": "Manage content production tasks, assign to members, and track progress"
+    },
+    "contentArticles": {
+      "title": "Article Export",
+      "subtitle": "Configure SEO metadata and JSON export for publishing"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Content management notifications and deadline reminders"
+    },
+    "managementIntelligence": {
+      "title": "Management Intelligence",
+      "subtitle": "Team performance analysis, content status reports, and management alerts"
+    }
+  },
   "seo": {
     "home": {
       "title": "Dadparvaraan Mehr Iran — Professional Legal Consultation & Services",

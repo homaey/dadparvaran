@@ -1,0 +1,4 @@
+import { db } from "@/lib/db";
+import { getCategoryPrompt } from "./category-prompts";
+import { loadRelevantLegalSources } from "./legal-sources";
+export async function loadArticleContext(taskId:number){const task=await db.task.findUnique({where:{id:taskId},include:{calendarItem:{include:{contentPlan:true}}}});if(!task?.calendarItem||task.calendarItem.contentPlan.status!=="APPROVED")throw new Error("این وظیفه به برنامه محتوایی تأییدشده متصل نیست");const item=task.calendarItem;const [categoryGuidance,legalSources]=await Promise.all([getCategoryPrompt(item.articleType),loadRelevantLegalSources(item.title,item.keyword,item.legalCategory)]);return {task,item,context:{title:item.title,articleType:item.articleType,legalCategory:item.legalCategory,audience:item.targetAudience,goal:item.contentPlan.goal,keyword:item.keyword,planTitle:item.contentPlan.title,categoryGuidance,legalSources}}}

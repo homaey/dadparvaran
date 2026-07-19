@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { authOptions } from "@/lib/auth";
+import { canDirectPublish } from "@/modules/article-publishing/policy";
+import { detectSensitivePersonalData } from "@/modules/content-safety/pii";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -63,7 +65,7 @@ export async function POST(req: NextRequest) {
   const teamMemberId = (session?.user as any)?.teamMemberId;
   const teamMemberStatus = (session?.user as any)?.teamMemberStatus;
 
-  if (!session?.user || !["LAWYER", "ADMIN"].includes(role)) {
+  if (!session?.user || !["LAWYER", "ADMIN", "CONTENT_CREATOR"].includes(role)) {
     return NextResponse.json({ error: "دسترسی غیرمجاز" }, { status: 403 });
   }
 
@@ -75,6 +77,16 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = createSchema.parse(body);
 
+    if (data.status === "PUBLISHED" && !canDirectPublish(role)) {
+      return NextResponse.json(
+        { error: "انتشار مستقیم مجاز نیست؛ مقاله را به‌صورت پیش‌نویس ذخیره و برای تأیید ادمین ارسال کنید" },
+        { status: 403 },
+      );
+    }
+    if (data.status === "PUBLISHED" && detectSensitivePersonalData(JSON.stringify(data.blocks)).length) {
+      return NextResponse.json({ error: "پیش از انتشار، اطلاعات شخصی احتمالی را از مقاله حذف کنید" }, { status: 409 });
+    }
+
     const existing = await db.article.findFirst({
       where: { slug: data.slug },
     });
@@ -82,10 +94,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "این slug قبلاً استفاده شده است" }, { status: 409 });
     }
 
-    const resolvedAuthorId = (role === "ADMIN" && data.authorId) ? data.authorId : teamMemberId;
+    const canChooseAuthor = role === "ADMIN" || role === "CONTENT_CREATOR";
+    const resolvedAuthorId = canChooseAuthor && data.authorId ? data.authorId : teamMemberId;
 
     if (!resolvedAuthorId) {
-      return NextResponse.json({ error: "پروفایل یافت نشد" }, { status: 400 });
+      return NextResponse.json({ error: "نویسنده مقاله را انتخاب کنید" }, { status: 400 });
+    }
+
+    const approvedAuthor = await db.teamMember.findFirst({
+      where: { id: resolvedAuthorId, status: "APPROVED", isActive: true },
+      select: { id: true },
+    });
+    if (!approvedAuthor) {
+      return NextResponse.json({ error: "نویسنده انتخاب‌شده فعال یا تأییدشده نیست" }, { status: 400 });
     }
 
     const { categoryId, tags, blocks, authorId: _aid, ...rest } = data;

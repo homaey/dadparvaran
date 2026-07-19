@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Settings, Save, Globe, Users, Phone, CheckCircle, Loader2 } from "lucide-react";
+import { Settings, Save, Globe, Users, Phone, CheckCircle, Loader2, Bot, Zap } from "lucide-react";
 
 interface SiteData {
   siteName_fa?: string;
@@ -27,6 +27,12 @@ interface SiteData {
   contact_address_en?: string;
 }
 
+interface AiSettingsData {
+  provider: "openai" | "claude" | "parspack";
+  hasApiKey: boolean;
+  model: string;
+}
+
 export default function SettingsPage() {
   const locale = useLocale();
   const isRTL = locale === "fa";
@@ -37,7 +43,14 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"hero" | "stats" | "contact">("hero");
+  const [activeTab, setActiveTab] = useState<"hero" | "stats" | "contact" | "ai">("hero");
+
+  // AI settings state
+  const [aiData, setAiData] = useState<AiSettingsData>({ provider: "openai", hasApiKey: false, model: "" });
+  const [aiApiKey, setAiApiKey] = useState("");
+  const [aiSaving, setAiSaving] = useState(false);
+  const [aiTesting, setAiTesting] = useState(false);
+  const [aiMsg, setAiMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push(`/${locale}/auth/login`);
@@ -47,9 +60,15 @@ export default function SettingsPage() {
   }, [status, session, locale, router]);
 
   useEffect(() => {
-    fetch("/api/admin/settings")
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
+    Promise.all([
+      fetch("/api/admin/settings").then((r) => r.json()),
+      fetch("/api/admin/ai-settings").then((r) => r.json()),
+    ])
+      .then(([siteSettings, aiSettings]) => {
+        setData(siteSettings);
+        setAiData(aiSettings);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 
@@ -75,6 +94,52 @@ export default function SettingsPage() {
     }
   }
 
+  async function saveAiSettings() {
+    setAiSaving(true);
+    setAiMsg(null);
+    try {
+      const body: Record<string, string> = {
+        provider: aiData.provider,
+        model: aiData.model,
+      };
+      if (aiApiKey) body.apiKey = aiApiKey;
+
+      const res = await fetch("/api/admin/ai-settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      setAiData((prev) => ({ ...prev, hasApiKey: prev.hasApiKey || !!aiApiKey }));
+      setAiApiKey("");
+      setAiMsg({ type: "ok", text: isRTL ? "تنظیمات AI ذخیره شد" : "AI settings saved" });
+    } catch {
+      setAiMsg({ type: "err", text: isRTL ? "خطا در ذخیره تنظیمات AI" : "Failed to save AI settings" });
+    } finally {
+      setAiSaving(false);
+    }
+  }
+
+  async function testAiConnection() {
+    setAiTesting(true);
+    setAiMsg(null);
+    try {
+      const res = await fetch("/api/admin/ai-settings", { method: "POST" });
+      const result = await res.json();
+      setAiMsg({ type: result.ok ? "ok" : "err", text: result.message });
+    } catch {
+      setAiMsg({ type: "err", text: isRTL ? "خطا در تست اتصال" : "Connection test failed" });
+    } finally {
+      setAiTesting(false);
+    }
+  }
+
+  const defaultModels: Record<string, string[]> = {
+    openai: ["gpt-4o-mini", "gpt-4o", "gpt-4.1-mini", "gpt-4.1"],
+    claude: ["claude-sonnet-4-20250514", "claude-haiku-4-5-20251001", "claude-opus-4-20250514"],
+    parspack: ["openai/gpt-4o-mini", "openai/gpt-4o", "openai/gpt-4.1-mini", "openai/gpt-4.1", "openai/gpt-5.5"],
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -84,9 +149,10 @@ export default function SettingsPage() {
   }
 
   const tabs = [
-    { id: "hero" as const, label: isRTL ? "صفحه اصلی (Hero)" : "Homepage Hero", icon: Globe },
+    { id: "hero" as const, label: isRTL ? "صفحه اصلی" : "Homepage Hero", icon: Globe },
     { id: "stats" as const, label: isRTL ? "آمار و ارقام" : "Statistics", icon: Users },
     { id: "contact" as const, label: isRTL ? "اطلاعات تماس" : "Contact Info", icon: Phone },
+    { id: "ai" as const, label: isRTL ? "هوش مصنوعی" : "AI Settings", icon: Bot },
   ];
 
   return (
@@ -101,17 +167,19 @@ export default function SettingsPage() {
             {isRTL ? "ویرایش محتوای صفحات سایت از اینجا" : "Edit site page content from here"}
           </p>
         </div>
-        <button
-          onClick={save}
-          disabled={saving}
-          className="flex items-center gap-2 bg-primary-700 hover:bg-primary-800 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-        >
-          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-          {isRTL ? "ذخیره همه" : "Save All"}
-        </button>
+        {activeTab !== "ai" && (
+          <button
+            onClick={save}
+            disabled={saving}
+            className="flex items-center gap-2 bg-primary-700 hover:bg-primary-800 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            {isRTL ? "ذخیره همه" : "Save All"}
+          </button>
+        )}
       </div>
 
-      {msg && (
+      {msg && activeTab !== "ai" && (
         <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-xl ${
           msg.type === "ok" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
         }`}>
@@ -121,12 +189,12 @@ export default function SettingsPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl overflow-x-auto">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               activeTab === id
                 ? "bg-white text-primary-700 shadow-sm"
                 : "text-gray-500 hover:text-gray-700"
@@ -188,15 +256,146 @@ export default function SettingsPage() {
             <Field label={isRTL ? "آدرس (انگلیسی)" : "Address (EN)"} value={data.contact_address_en ?? ""} onChange={(v) => set("contact_address_en", v)} textarea placeholder="Tehran, ..." />
           </>
         )}
+
+        {activeTab === "ai" && (
+          <>
+            <h2 className="font-bold text-gray-800 text-sm uppercase tracking-wide text-primary-600 flex items-center gap-2">
+              <Bot className="w-4 h-4" />
+              {isRTL ? "تنظیمات هوش مصنوعی" : "AI Provider Settings"}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {isRTL
+                ? "این تنظیمات برای تولید محتوا، بررسی کیفیت و استراتژی محتوا استفاده می‌شود. همه کاربران (ادمین و وکلا) از همین کلید API استفاده می‌کنند."
+                : "These settings are used for content generation, quality review, and content strategy. All users (admin and lawyers) share the same API key."}
+            </p>
+
+            {/* Provider Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {isRTL ? "ارائه‌دهنده هوش مصنوعی" : "AI Provider"}
+              </label>
+              <div className="flex gap-3">
+                {(["openai", "claude", "parspack"] as const).map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => {
+                      setAiData((prev) => ({
+                        ...prev,
+                        provider: p,
+                        model: defaultModels[p][0],
+                      }));
+                    }}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
+                      aiData.provider === p
+                        ? "border-primary-600 bg-primary-50 text-primary-700"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                    }`}
+                  >
+                    {p === "openai" ? "OpenAI" : p === "claude" ? "Claude (Anthropic)" : "Parspack AI Studio"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* API Key */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {isRTL ? "کلید API" : "API Key"}
+              </label>
+              {aiData.hasApiKey && !aiApiKey && (
+                <p className="text-xs text-green-600 mb-1.5 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3" />
+                  {isRTL ? "کلید قبلاً تنظیم شده است. برای تغییر، کلید جدید وارد کنید." : "Key is already set. Enter a new one to change it."}
+                </p>
+              )}
+              <input
+                type="password"
+                value={aiApiKey}
+                onChange={(e) => setAiApiKey(e.target.value)}
+                placeholder={aiData.hasApiKey ? "••••••••••••" : (aiData.provider === "openai" ? "sk-..." : "sk-ant-...")}
+                dir="ltr"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-mono"
+              />
+            </div>
+
+            {/* Model Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                {isRTL ? "مدل" : "Model"}
+              </label>
+              <select
+                value={aiData.model || defaultModels[aiData.provider][0]}
+                onChange={(e) => setAiData((prev) => ({ ...prev, model: e.target.value }))}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white"
+              >
+                {defaultModels[aiData.provider].map((m) => (
+                  <option key={m} value={m}>{m}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                {isRTL ? "یا مدل سفارشی وارد کنید:" : "Or enter a custom model:"}
+              </p>
+              <input
+                type="text"
+                value={aiData.model}
+                onChange={(e) => setAiData((prev) => ({ ...prev, model: e.target.value }))}
+                placeholder={defaultModels[aiData.provider][0]}
+                dir="ltr"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm mt-1"
+              />
+            </div>
+
+            {/* AI Message */}
+            {aiMsg && (
+              <div className={`flex items-center gap-2 text-sm px-4 py-3 rounded-xl ${
+                aiMsg.type === "ok" ? "bg-green-50 text-green-700 border border-green-200" : "bg-red-50 text-red-700 border border-red-200"
+              }`}>
+                {aiMsg.type === "ok" && <CheckCircle className="w-4 h-4 shrink-0" />}
+                {aiMsg.text}
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={saveAiSettings}
+                disabled={aiSaving}
+                className="flex items-center gap-2 bg-primary-700 hover:bg-primary-800 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              >
+                {aiSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                {isRTL ? "ذخیره تنظیمات AI" : "Save AI Settings"}
+              </button>
+              <button
+                onClick={testAiConnection}
+                disabled={aiTesting || !aiData.hasApiKey}
+                className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors"
+              >
+                {aiTesting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                {isRTL ? "تست اتصال" : "Test Connection"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Note */}
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
-        <strong>{isRTL ? "نکته: " : "Note: "}</strong>
-        {isRTL
-          ? "مقادیر خالی از ترجمه‌های پیش‌فرض سایت استفاده می‌کنند. فقط مقادیری که می‌خواهید سفارشی کنید را پر کنید."
-          : "Empty fields fall back to default site translations. Only fill in values you want to customize."}
-      </div>
+      {activeTab !== "ai" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+          <strong>{isRTL ? "نکته: " : "Note: "}</strong>
+          {isRTL
+            ? "مقادیر خالی از ترجمه‌های پیش‌فرض سایت استفاده می‌کنند. فقط مقادیری که می‌خواهید سفارشی کنید را پر کنید."
+            : "Empty fields fall back to default site translations. Only fill in values you want to customize."}
+        </div>
+      )}
+
+      {activeTab === "ai" && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
+          <strong>{isRTL ? "نکته امنیتی: " : "Security note: "}</strong>
+          {isRTL
+            ? "کلید API به صورت رمزنگاری‌شده در دیتابیس ذخیره می‌شود. برای امنیت بیشتر، متغیر AI_ENCRYPTION_KEY در محیط سرور باید تنظیم شده باشد."
+            : "API key is stored encrypted in the database. For security, AI_ENCRYPTION_KEY environment variable must be set on the server."}
+        </div>
+      )}
     </div>
   );
 }

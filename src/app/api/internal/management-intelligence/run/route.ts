@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server";import { runManagementAlerts,sendDailySummary } from "@/modules/management-intelligence/service";
+export async function POST(req:Request){const secret=process.env.CRON_SECRET;if(!secret||req.headers.get("authorization")!==`Bearer ${secret}`)return NextResponse.json({error:"Unauthorized"},{status:401});const summary=new URL(req.url).searchParams.get("summary")==="1";return NextResponse.json(summary?await sendDailySummary():await runManagementAlerts())}

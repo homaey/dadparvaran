@@ -21,7 +21,7 @@ export default async function Layout({
     redirect(`/${locale}/auth/login`);
   }
 
-  const role = (session.user as any).role as "LAWYER" | "ADMIN";
+  const role = (session.user as any).role as "LAWYER" | "ADMIN" | "CONTENT_CREATOR" | "LEGAL_REVIEWER";
   const name = session.user.name ?? "کاربر";
 
   return (

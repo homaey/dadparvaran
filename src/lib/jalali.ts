@@ -101,3 +101,25 @@ export function formatJalaliParts(parts: JalaliParts): string {
 export function jalaliMonthLen(jy: number, jm: number): number {
   return jalaaliMonthLength(jy, jm);
 }
+
+/** «YYYY-MM-DD» میلادی → اجزای شمسی. برای ورودی‌های تاریخ که مقدارشان ISO ذخیره می‌شود. */
+export function isoToJalaliParts(iso: string): JalaliParts | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso.trim());
+  if (!match) return null;
+  const [, gy, gm, gd] = match;
+  const j = toJalaali(Number(gy), Number(gm), Number(gd));
+  return { jy: j.jy, jm: j.jm, jd: j.jd };
+}
+
+/** اجزای شمسی → «YYYY-MM-DD» میلادی، همان شکلی که سرور و اسکیما انتظار دارند. */
+export function jalaliPartsToIso(parts: JalaliParts): string {
+  const g = toGregorian(parts.jy, parts.jm, parts.jd);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${g.gy}-${pad(g.gm)}-${pad(g.gd)}`;
+}
+
+export function todayJalaliParts(): JalaliParts {
+  const now = new Date();
+  const j = toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate());
+  return { jy: j.jy, jm: j.jm, jd: j.jd };
+}

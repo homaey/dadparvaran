@@ -2,6 +2,8 @@ import Link from "next/link";
 import { getLocale } from "next-intl/server";
 import { Phone, Award, ArrowLeft, ArrowRight, Scale, MessageSquare } from "lucide-react";
 import { db } from "@/lib/db";
+import { toWhatsAppLink } from "@/lib/whatsapp";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 
 type Lawyer = {
   id: number;
@@ -62,7 +64,7 @@ export default async function ContactLawyersCTA({
             : "Our team of expert lawyers is ready to answer your questions."}
         </p>
         <div className="space-y-3">
-          {lawyers.slice(0, 3).map((lawyer) => (
+          {lawyers.map((lawyer) => (
             <div
               key={lawyer.id}
               className="flex items-center gap-3 bg-white/10 rounded-xl p-3"
@@ -89,15 +91,28 @@ export default async function ContactLawyersCTA({
                   {isRTL ? lawyer.roleFA : lawyer.roleEN}
                 </p>
               </div>
-              {lawyer.phone && (
-                <a
-                  href={`tel:${lawyer.phone}`}
-                  className="w-9 h-9 bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center shrink-0 transition-colors"
-                  aria-label={`${isRTL ? "تماس با" : "Call"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
-                >
-                  <Phone className="w-4 h-4" />
-                </a>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {toWhatsAppLink(lawyer.phone) && (
+                  <a
+                    href={toWhatsAppLink(lawyer.phone)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 bg-[#25D366] hover:bg-[#1da851] rounded-lg flex items-center justify-center transition-colors"
+                    aria-label={`${isRTL ? "واتساپ" : "WhatsApp"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
+                  >
+                    <WhatsAppIcon className="w-4 h-4 text-white" />
+                  </a>
+                )}
+                {lawyer.phone && (
+                  <a
+                    href={`tel:${lawyer.phone}`}
+                    className="w-9 h-9 bg-primary-700 hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors"
+                    aria-label={`${isRTL ? "تماس با" : "Call"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
+                  >
+                    <Phone className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -178,14 +193,28 @@ export default async function ContactLawyersCTA({
                 </span>
               </div>
               {lawyer.phone && (
-                <a
-                  href={`tel:${lawyer.phone}`}
-                  className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition-colors cursor-pointer"
-                  aria-label={`${isRTL ? "تماس با" : "Call"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  {isRTL ? "تماس مستقیم" : "Direct Call"}
-                </a>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`tel:${lawyer.phone}`}
+                    className="flex-1 flex items-center justify-center gap-2 bg-primary-700 hover:bg-primary-600 text-white text-xs px-3 py-2.5 rounded-xl font-semibold transition-colors cursor-pointer"
+                    aria-label={`${isRTL ? "تماس با" : "Call"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    {isRTL ? "تماس" : "Call"}
+                  </a>
+                  {toWhatsAppLink(lawyer.phone) && (
+                    <a
+                      href={toWhatsAppLink(lawyer.phone)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white text-xs px-3 py-2.5 rounded-xl font-semibold transition-colors cursor-pointer"
+                      aria-label={`${isRTL ? "واتساپ" : "WhatsApp"} ${isRTL ? lawyer.nameFA : lawyer.nameEN}`}
+                    >
+                      <WhatsAppIcon className="w-3.5 h-3.5" />
+                      {isRTL ? "واتساپ" : "WhatsApp"}
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           ))}

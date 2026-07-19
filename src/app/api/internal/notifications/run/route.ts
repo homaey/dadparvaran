@@ -1,0 +1,2 @@
+import { NextResponse } from "next/server";import { scheduleDeadlineNotifications } from "@/modules/notifications/scheduler";
+export async function POST(req:Request){const secret=process.env.CRON_SECRET;if(!secret||req.headers.get("authorization")!==`Bearer ${secret}`)return NextResponse.json({error:"Unauthorized"},{status:401});const created=await scheduleDeadlineNotifications();return NextResponse.json({created})}

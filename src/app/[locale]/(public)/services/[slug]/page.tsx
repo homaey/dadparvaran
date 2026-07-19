@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, CheckCircle2, Phone } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Phone, BookOpen } from "lucide-react";
 import { servicesData, getServiceBySlug, getChildServices } from "@/lib/services-data";
 import { getBreadcrumbSchema, getFAQSchema, getServiceSchema } from "@/lib/schema";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
+import { toWhatsAppLink } from "@/lib/whatsapp";
+import { db } from "@/lib/db";
 
 export async function generateStaticParams() {
   return servicesData.map((s) => ({ slug: s.slug }));
@@ -68,6 +71,14 @@ export default async function ServiceDetailPage({
   const content = isRTL ? service.contentFA : service.contentEN;
   const points = isRTL ? service.pointsFA : service.pointsEN;
 
+  // شماره واتساپ اولین وکیل فعال برای دکمه‌ی برجسته‌ی هدر
+  const firstLawyer = await db.teamMember.findFirst({
+    where: { isActive: true, status: "APPROVED", phone: { not: null } },
+    orderBy: { order: "asc" },
+    select: { phone: true },
+  });
+  const whatsappHref = toWhatsAppLink(firstLawyer?.phone);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }} />
@@ -95,6 +106,17 @@ export default async function ServiceDetailPage({
                 <Phone className="w-5 h-5" />
                 {isRTL ? "مشاوره رایگان" : "Free Consultation"}
               </Link>
+              {whatsappHref && (
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-[#25D366]/25"
+                >
+                  <WhatsAppIcon className="w-5 h-5" />
+                  {isRTL ? "مشاوره واتساپ" : "WhatsApp"}
+                </a>
+              )}
               <Link
                 href={`/${locale}/services`}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all backdrop-blur-sm"
@@ -131,7 +153,20 @@ export default async function ServiceDetailPage({
               </div>
             </div>
 
-            {/* CTA is rendered as full-width section below */}
+            {/* لینک داخلی به مقالهٔ پشتیبان مرتبط */}
+            {service.relatedArticleSlug && service.relatedArticleTitle && (
+              <div className="mt-8">
+                <Link
+                  href={`/${locale}/articles/${service.relatedArticleSlug}`}
+                  className="flex items-center gap-3 p-5 bg-primary-50 border border-primary-200 rounded-xl hover:bg-primary-100 hover:border-primary-300 transition-all shadow-sm group"
+                >
+                  <BookOpen className="w-5 h-5 text-primary-600 shrink-0 group-hover:scale-110 transition-transform" />
+                  <span className="text-primary-700 text-sm font-semibold">
+                    {isRTL ? "مقالهٔ مرتبط: " : "Related article: "}{service.relatedArticleTitle}
+                  </span>
+                </Link>
+              </div>
+            )}
           </div>
         </section>
 

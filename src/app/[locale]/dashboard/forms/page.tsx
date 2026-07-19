@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale } from "next-intl";
 import {
   Plus, Pencil, Trash2, Eye, EyeOff, FileText,
   ChevronDown, ChevronUp, Save, X, FolderTree,
+  Sparkles, Loader2,
 } from "lucide-react";
 
 interface Category {
@@ -37,6 +38,117 @@ const DOC_TYPES = [
   { value: "appeal", label: "تجدیدنظرخواهی" },
 ];
 
+const FORM_STYLES = `
+  .form-editor-container {
+    --border: #181818;
+    --paper: #fff;
+    --soft: #f8fafc;
+    --line: #d9dee7;
+    --blue: #194f8a;
+    font-family: "B Nazanin","BNazanin","Nazanin","IRANSans","Vazirmatn","Estedad",Tahoma,Arial,sans-serif;
+    font-size: 12px;
+    line-height: 1.75;
+    color: #111;
+    direction: rtl;
+  }
+  .form-editor-container .page {
+    width: 100%;
+    background: #fff;
+    padding: 6mm;
+    box-sizing: border-box;
+  }
+  .form-editor-container .frame {
+    border: 2px solid var(--border);
+    padding: 4mm;
+    position: relative;
+  }
+  .form-editor-container .brand-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 0 2mm;
+  }
+  .form-editor-container .brand-logo { width: 14mm; height: 14mm; margin-bottom: 1mm; }
+  .form-editor-container .brand-logo img { width: 100%; height: 100%; object-fit: contain; }
+  .form-editor-container .brand-text { font-size: 10px; font-weight: 900; text-align: center; }
+  .form-editor-container .brand-sub { font-size: 9px; font-weight: 700; color: #333; text-align: center; }
+  .form-editor-container .p-title { text-align: center; font-size: 15px; font-weight: 900; margin: 0 0 3mm; }
+  .form-editor-container .top-meta {
+    display: grid;
+    grid-template-columns: 22mm 1fr 22mm 1fr;
+    border: 1px solid var(--border);
+    margin-bottom: 2mm;
+    font-weight: 700;
+    font-size: 10px;
+  }
+  .form-editor-container .top-meta > div {
+    border-left: 1px solid var(--border);
+    min-height: 7mm;
+    padding: 1mm 1.5mm;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .form-editor-container .top-meta > div:nth-child(2n-1) { background: #f5f5f5; }
+  .form-editor-container .top-meta > div:last-child { border-left: 0; }
+  .form-editor-container .top-meta .val { justify-content: flex-start; font-weight: 400; }
+  .form-editor-container table.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-bottom: 2mm;
+    font-size: 10px;
+  }
+  .form-editor-container .print-table th, .form-editor-container .print-table td {
+    border: 1px solid var(--border);
+    padding: 1mm;
+    vertical-align: middle;
+    text-align: center;
+    word-break: break-word;
+  }
+  .form-editor-container .print-table th { background: #f7f7f7; font-weight: 800; }
+  .form-editor-container .caption { background: #efefef !important; text-align: right !important; padding-right: 2mm !important; font-size: 11px !important; }
+  .form-editor-container .role-cell { width: 18mm; background: #fbfbfb; font-weight: 800; }
+  .form-editor-container .value { text-align: right; white-space: pre-wrap; min-height: 5mm; }
+  .form-editor-container .section-row td { height: 16mm; vertical-align: top !important; }
+  .form-editor-container .label-cell { width: 34mm; background: #f7f7f7; font-weight: 900; text-align: center !important; vertical-align: middle !important; line-height: 1.6; }
+  .form-editor-container .body-box { border: 1px solid var(--border); padding: 2mm; margin-top: 1.5mm; min-height: 40mm; }
+  .form-editor-container .body-head { font-weight: 900; margin-bottom: 1.5mm; font-size: 11px; }
+  .form-editor-container .body-preview { white-space: pre-wrap; text-align: justify; line-height: 1.9; min-height: 30mm; font-size: 11px; }
+  .form-editor-container .signature-line {
+    height: 12mm;
+    border: 1px solid var(--border);
+    border-top: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 2mm;
+    font-weight: 800;
+    font-size: 10px;
+  }
+  .form-editor-container .footer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border);
+    margin-top: 2mm;
+    min-height: 14mm;
+    font-size: 10px;
+  }
+  .form-editor-container .footer-grid > div { border-left: 1px solid var(--border); padding: 1.5mm; line-height: 1.7; }
+  .form-editor-container .footer-grid > div:last-child { border-left: 0; }
+
+  .form-editor-container [contenteditable=true]:focus {
+    outline: 2px solid #6366f1;
+    outline-offset: 1px;
+    border-radius: 2px;
+    background: #eef2ff;
+  }
+  .form-editor-container [contenteditable=true]:hover {
+    background: #f5f3ff;
+    cursor: text;
+  }
+`;
+
 export default function AdminFormsPage() {
   const locale = useLocale();
   const isRTL = locale === "fa";
@@ -47,6 +159,8 @@ export default function AdminFormsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showNew, setShowNew] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [aiEditing, setAiEditing] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
     slug: "", categoryId: "" as string, docType: "petition",
@@ -92,9 +206,20 @@ export default function AdminFormsPage() {
     setShowNew(true);
   };
 
+  const syncContentFromEditor = () => {
+    if (contentRef.current) {
+      const html = contentRef.current.innerHTML;
+      setForm((f) => ({ ...f, content: html }));
+      return html;
+    }
+    return form.content;
+  };
+
   const handleSave = async () => {
+    const currentContent = syncContentFromEditor();
     const payload = {
       ...form,
+      content: currentContent,
       categoryId: form.categoryId ? Number(form.categoryId) : null,
       ...(editingId ? { id: editingId } : {}),
     };
@@ -117,6 +242,31 @@ export default function AdminFormsPage() {
     fetchData();
   };
 
+  const handleAiEdit = async () => {
+    const currentContent = syncContentFromEditor();
+    if (!currentContent.trim()) return;
+    setAiEditing(true);
+    try {
+      const res = await fetch("/api/admin/ai-edit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: currentContent, promptKey: "sys_forms_edit" }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.result) {
+        setForm((f) => ({ ...f, content: data.result }));
+        if (contentRef.current) {
+          contentRef.current.innerHTML = data.result;
+        }
+      }
+    } catch {
+      alert(isRTL ? "خطا در ویرایش با هوش مصنوعی" : "AI edit failed");
+    } finally {
+      setAiEditing(false);
+    }
+  };
+
   const togglePublish = async (t: Template) => {
     await fetch("/api/admin/forms", {
       method: "PUT",
@@ -125,6 +275,14 @@ export default function AdminFormsPage() {
     });
     fetchData();
   };
+
+  useEffect(() => {
+    if (!showNew || !editingId || !contentRef.current) return;
+    const el = contentRef.current;
+    el.querySelectorAll(".value, .val, .body-preview, .body-head, .signature-line, .footer-grid div, .brand-text, .brand-sub, .p-title").forEach((node) => {
+      (node as HTMLElement).setAttribute("contenteditable", "true");
+    });
+  }, [showNew, editingId, form.content]);
 
   if (loading) {
     return (
@@ -136,6 +294,8 @@ export default function AdminFormsPage() {
 
   return (
     <div className="space-y-6" dir={isRTL ? "rtl" : "ltr"}>
+      <style dangerouslySetInnerHTML={{ __html: FORM_STYLES }} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -255,19 +415,59 @@ export default function AdminFormsPage() {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {isRTL ? "محتوای سند (HTML)" : "Document Content (HTML)"} *
-            </label>
-            <textarea
-              value={form.content}
-              onChange={(e) => setForm({ ...form, content: e.target.value })}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono"
-              rows={12}
-              dir="ltr"
-              placeholder='<div class="legal-form-doc" dir="rtl">...</div>'
-            />
-          </div>
+          {/* Visual Document Editor */}
+          {editingId && form.content && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-700">
+                  {isRTL ? "ویرایش متن سند" : "Edit Document Text"}
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">
+                    {isRTL ? "روی متن کلیک کنید تا ویرایش شود" : "Click on text to edit"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleAiEdit}
+                    disabled={aiEditing}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 disabled:opacity-50 transition-colors cursor-pointer"
+                  >
+                    {aiEditing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                    {isRTL ? "بهبود متن با AI" : "Improve text with AI"}
+                  </button>
+                </div>
+              </div>
+              <div className="bg-[#e9eaee] rounded-xl border border-gray-200 p-4 overflow-x-auto">
+                <div
+                  ref={contentRef}
+                  className="form-editor-container bg-white mx-auto"
+                  dangerouslySetInnerHTML={{ __html: form.content }}
+                />
+              </div>
+              <p className="text-xs text-gray-400 mt-1.5">
+                {isRTL
+                  ? "قالب و ساختار سند ثابت است. فقط متن‌های داخل سند قابل ویرایش هستند."
+                  : "Document structure is fixed. Only text content is editable."}
+              </p>
+            </div>
+          )}
+
+          {/* Hidden HTML textarea for new templates only */}
+          {!editingId && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {isRTL ? "محتوای سند (HTML)" : "Document Content (HTML)"} *
+              </label>
+              <textarea
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm font-mono"
+                rows={12}
+                dir="ltr"
+                placeholder='<div class="page" dir="rtl">...</div>'
+              />
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -318,7 +518,7 @@ export default function AdminFormsPage() {
                   <div className="text-xs text-gray-400 mt-0.5" dir="ltr">{t.slug}</div>
                 </td>
                 <td className="px-4 py-3 text-gray-600">
-                  {t.category?.nameFA || (isRTL ? "—" : "—")}
+                  {t.category?.nameFA || "—"}
                 </td>
                 <td className="px-4 py-3">
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary-50 text-primary-700">
@@ -394,7 +594,7 @@ export default function AdminFormsPage() {
                 {isRTL ? "پیش‌نمایش محتوا:" : "Content Preview:"}
               </h3>
               <div className="bg-white border border-gray-200 rounded-xl p-6 max-h-96 overflow-y-auto">
-                <div dangerouslySetInnerHTML={{ __html: t.content }} />
+                <div className="form-editor-container" dangerouslySetInnerHTML={{ __html: t.content }} />
               </div>
             </div>
           );
