@@ -6,6 +6,7 @@ import { getLawBySlug, getLawTree, getTagsForLegalNode } from "@/lib/laws";
 import type { Metadata } from "next";
 import { toPersianDigits } from "@/lib/utils";
 import LawTreeClient from "./LawTreeClient";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 export async function generateMetadata({
   params,
@@ -27,13 +28,10 @@ export async function generateMetadata({
       type: "article",
       images: ["/og-image.jpg"],
     },
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/laws/${slug}`,
-      languages: {
-        fa: `https://www.dadparvaran.com/fa/laws/${slug}`,
-        en: `https://www.dadparvaran.com/en/laws/${slug}`,
-      },
-    },
+    alternates: alternatesMetadata(locale, `/laws/${slug}`),
+    ...(shouldNoindexEnglish(locale, `/laws/${slug}`) && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 

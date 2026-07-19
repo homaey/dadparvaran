@@ -29,7 +29,7 @@ export async function generateMetadata({
     },
     alternates: {
       canonical: `https://www.dadparvaran.com/${locale}`,
-      languages: { fa: "https://www.dadparvaran.com/fa", en: "https://www.dadparvaran.com/en" },
+      languages: { fa: "https://www.dadparvaran.com/fa", en: "https://www.dadparvaran.com/en", "x-default": "https://www.dadparvaran.com/fa" },
     },
   };
 }

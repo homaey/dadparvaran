@@ -33,6 +33,7 @@ export async function generateMetadata({
       languages: {
         fa: `https://www.dadparvaran.com/fa/calculators/${decodedSlug}`,
         en: `https://www.dadparvaran.com/en/calculators/${decodedSlug}`,
+        "x-default": `https://www.dadparvaran.com/fa/calculators/${decodedSlug}`,
       },
     },
   };

@@ -28,7 +28,7 @@ export async function generateMetadata({
     keywords: isFA ? service.keywordsFA : service.keywordsEN,
     alternates: {
       canonical: `https://www.dadparvaran.com/${locale}/services/${slug}`,
-      languages: { fa: `/fa/services/${slug}`, en: `/en/services/${slug}` },
+      languages: { fa: `https://www.dadparvaran.com/fa/services/${slug}`, en: `https://www.dadparvaran.com/en/services/${slug}`, "x-default": `https://www.dadparvaran.com/fa/services/${slug}` },
     },
     openGraph: {
       title: isFA ? service.metaTitleFA : service.metaTitleEN,

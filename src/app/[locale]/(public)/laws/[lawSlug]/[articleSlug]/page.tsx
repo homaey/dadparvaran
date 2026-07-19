@@ -6,6 +6,7 @@ import { getAdjacentArticles, getLegalArticleBySlug, getTagsForLegalNode } from 
 import { db } from "@/lib/db";
 import type { Metadata } from "next";
 import { toPersianDigits } from "@/lib/utils";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 export async function generateMetadata({
   params,
@@ -26,13 +27,10 @@ export async function generateMetadata({
       type: "article",
       images: ["/og-image.jpg"],
     },
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/laws/${decodedLaw}/${decodedArticle}`,
-      languages: {
-        fa: `https://www.dadparvaran.com/fa/laws/${decodedLaw}/${decodedArticle}`,
-        en: `https://www.dadparvaran.com/en/laws/${decodedLaw}/${decodedArticle}`,
-      },
-    },
+    alternates: alternatesMetadata(locale, `/laws/${decodedLaw}/${decodedArticle}`),
+    ...(shouldNoindexEnglish(locale, `/laws/${decodedLaw}/${decodedArticle}`) && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 

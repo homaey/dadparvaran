@@ -18,7 +18,7 @@ export async function generateMetadata({
     description: t("description"),
     alternates: {
       canonical: `https://www.dadparvaran.com/${locale}/lawyers`,
-      languages: { fa: "https://www.dadparvaran.com/fa/lawyers", en: "https://www.dadparvaran.com/en/lawyers" },
+      languages: { fa: "https://www.dadparvaran.com/fa/lawyers", en: "https://www.dadparvaran.com/en/lawyers", "x-default": "https://www.dadparvaran.com/fa/lawyers" },
     },
   };
 }

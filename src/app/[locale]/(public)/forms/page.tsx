@@ -28,6 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ? "دانلود و مشاهده نمونه اوراق قضایی رایگان: دادخواست، شکواییه، اظهارنامه و تجدیدنظرخواهی"
       : "View and download free legal form templates: petitions, complaints, declarations and appeals",
     alternates: { canonical: `https://www.dadparvaran.com/${locale}/forms` },
+    ...(locale === "en" && { robots: { index: false, follow: true } }),
   };
 }
 

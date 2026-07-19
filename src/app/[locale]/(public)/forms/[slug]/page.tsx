@@ -40,6 +40,7 @@ export async function generateMetadata({
       type: "article",
       tags: catName ? [catName] : [],
     },
+    ...(locale === "en" && { robots: { index: false, follow: true } }),
   };
 }
 

@@ -30,6 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       languages: {
         fa: `https://www.dadparvaran.com/fa/lawyers/${id}`,
         en: `https://www.dadparvaran.com/en/lawyers/${id}`,
+        "x-default": `https://www.dadparvaran.com/fa/lawyers/${id}`,
       },
     },
   };

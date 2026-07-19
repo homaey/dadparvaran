@@ -5,6 +5,7 @@ import { getAllLaws } from "@/lib/laws";
 import type { Metadata } from "next";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
 import { toPersianDigits } from "@/lib/utils";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 export async function generateMetadata({
   params,
@@ -16,10 +17,10 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/laws`,
-      languages: { fa: "https://www.dadparvaran.com/fa/laws", en: "https://www.dadparvaran.com/en/laws" },
-    },
+    alternates: alternatesMetadata(locale, "/laws"),
+    ...(shouldNoindexEnglish(locale, "/laws") && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 

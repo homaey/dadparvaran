@@ -22,7 +22,7 @@ export async function generateMetadata({
       : ["legal services", "lawyer", "attorney", "legal consultation", "civil litigation", "criminal defense", "family lawyer"],
     alternates: {
       canonical: `https://www.dadparvaran.com/${locale}/services`,
-      languages: { fa: "https://www.dadparvaran.com/fa/services", en: "https://www.dadparvaran.com/en/services" },
+      languages: { fa: "https://www.dadparvaran.com/fa/services", en: "https://www.dadparvaran.com/en/services", "x-default": "https://www.dadparvaran.com/fa/services" },
     },
   };
 }

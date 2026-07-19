@@ -66,6 +66,7 @@ export async function generateMetadata({
       languages: {
         fa: "https://www.dadparvaran.com/fa",
         en: "https://www.dadparvaran.com/en",
+        "x-default": "https://www.dadparvaran.com/fa",
       },
     },
     robots: {

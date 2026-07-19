@@ -20,6 +20,7 @@ export async function generateMetadata({
       languages: {
         fa: "https://www.dadparvaran.com/fa/privacy",
         en: "https://www.dadparvaran.com/en/privacy",
+        "x-default": "https://www.dadparvaran.com/fa/privacy",
       },
     },
   };

@@ -1,20 +1,18 @@
 import type { MetadataRoute } from "next";
 import { PrismaClient } from "@prisma/client";
 import { servicesData } from "@/lib/services-data";
+import { hasCompleteEnglish } from "@/lib/i18n-pages";
 
 const BASE_URL = "https://www.dadparvaran.com";
-const locales = ["fa", "en"];
+const ALL_LOCALES = ["fa", "en"] as const;
 
 const db = new PrismaClient();
 
-// The law-article set is large (~9k nodes → ~18k URLs). Cache the rendered
-// sitemap for a day; with stale-while-revalidate, crawlers always get the
-// cached copy instantly while it regenerates in the background.
-// Per-URL hreflang alternates are intentionally omitted — every page already
-// emits on-page <link rel="alternate" hreflang> via its metadata, so repeating
-// them here would roughly double both the file size and the generation time
-// (which caused Googlebot fetch timeouts on the 1-vCPU host).
 export const revalidate = 86400;
+
+function localesFor(pathWithoutLocale: string): string[] {
+  return hasCompleteEnglish(pathWithoutLocale) ? [...ALL_LOCALES] : ["fa"];
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages = [
@@ -30,8 +28,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/terms", changeFrequency: "yearly" as const, priority: 0.3 },
   ];
 
-  const staticEntries = locales.flatMap((locale) =>
-    staticPages.map((page) => ({
+  const staticEntries = staticPages.flatMap((page) =>
+    localesFor(page.path).map((locale) => ({
       url: `${BASE_URL}/${locale}${page.path}`,
       lastModified: new Date(),
       changeFrequency: page.changeFrequency,
@@ -39,7 +37,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   );
 
-  const serviceEntries = locales.flatMap((locale) =>
+  const serviceEntries = localesFor("/services/x").flatMap((locale) =>
     servicesData.map((s) => ({
       url: `${BASE_URL}/${locale}/services/${s.slug}`,
       lastModified: new Date(),
@@ -54,14 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { status: "PUBLISHED" },
       select: { slug: true, updatedAt: true },
     });
-    articleEntries = locales.flatMap((locale) =>
-      articles.map((a) => ({
-        url: `${BASE_URL}/${locale}/articles/${a.slug}`,
-        lastModified: a.updatedAt,
-        changeFrequency: "weekly" as const,
-        priority: 0.7,
-      }))
-    );
+    articleEntries = articles.map((a) => ({
+      url: `${BASE_URL}/fa/articles/${a.slug}`,
+      lastModified: a.updatedAt,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
   } catch {}
 
   let calcEntries: MetadataRoute.Sitemap = [];
@@ -70,7 +66,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { isPublished: true },
       select: { slug: true },
     });
-    calcEntries = locales.flatMap((locale) =>
+    calcEntries = localesFor("/calculators/x").flatMap((locale) =>
       calcs.map((c) => ({
         url: `${BASE_URL}/${locale}/calculators/${c.slug}`,
         lastModified: new Date(),
@@ -86,17 +82,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { type: "LAW" },
       select: { slug: true, updatedAt: true },
     });
-    lawEntries = locales.flatMap((locale) =>
-      laws.map((l) => ({
-        url: `${BASE_URL}/${locale}/laws/${l.slug}`,
-        lastModified: l.updatedAt,
-        changeFrequency: "monthly" as const,
-        priority: 0.8,
-      }))
-    );
+    lawEntries = laws.map((l) => ({
+      url: `${BASE_URL}/fa/laws/${l.slug}`,
+      lastModified: l.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
   } catch {}
 
-  // Individual law articles (مواد قانون) — the bulk of the sitemap.
   let lawArticleEntries: MetadataRoute.Sitemap = [];
   try {
     const lawNodes = await db.legalNode.findMany({
@@ -110,33 +103,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, lawId: true, updatedAt: true },
     });
 
-    lawArticleEntries = locales.flatMap((locale) =>
-      articleNodes.flatMap((a) => {
-        const lawSlug = a.lawId != null ? lawSlugById.get(a.lawId) : undefined;
-        if (!lawSlug) return [];
-        return [
-          {
-            url: `${BASE_URL}/${locale}/laws/${lawSlug}/${a.slug}`,
-            lastModified: a.updatedAt,
-            changeFrequency: "yearly" as const,
-            priority: 0.6,
-          },
-        ];
-      })
-    );
+    lawArticleEntries = articleNodes.flatMap((a) => {
+      const lawSlug = a.lawId != null ? lawSlugById.get(a.lawId) : undefined;
+      if (!lawSlug) return [];
+      return [
+        {
+          url: `${BASE_URL}/fa/laws/${lawSlug}/${a.slug}`,
+          lastModified: a.updatedAt,
+          changeFrequency: "yearly" as const,
+          priority: 0.6,
+        },
+      ];
+    });
   } catch {}
 
   let tagEntries: MetadataRoute.Sitemap = [];
   try {
     const tags = await db.tag.findMany({ select: { slug: true } });
-    tagEntries = locales.flatMap((locale) =>
-      tags.map((t) => ({
-        url: `${BASE_URL}/${locale}/tags/${t.slug}`,
-        lastModified: new Date(),
-        changeFrequency: "weekly" as const,
-        priority: 0.5,
-      }))
-    );
+    tagEntries = tags.map((t) => ({
+      url: `${BASE_URL}/fa/tags/${t.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }));
   } catch {}
 
   let teamEntries: MetadataRoute.Sitemap = [];
@@ -145,7 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       where: { isActive: true, status: "APPROVED" },
       select: { id: true },
     });
-    teamEntries = locales.flatMap((locale) =>
+    teamEntries = localesFor("/lawyers/1").flatMap((locale) =>
       members.map((m) => ({
         url: `${BASE_URL}/${locale}/lawyers/${m.id}`,
         lastModified: new Date(),

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Landmark, BookOpen, Users, Tag as TagIcon } from "lucide-react";
 import { getTagBySlug, getItemsByTag } from "@/lib/tags";
 import type { Metadata } from "next";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 export async function generateMetadata({
   params,
@@ -23,13 +24,10 @@ export async function generateMetadata({
       description: tag.description ?? undefined,
       images: ["/og-image.jpg"],
     },
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/tags/${decodedSlug}`,
-      languages: {
-        fa: `https://www.dadparvaran.com/fa/tags/${decodedSlug}`,
-        en: `https://www.dadparvaran.com/en/tags/${decodedSlug}`,
-      },
-    },
+    alternates: alternatesMetadata(locale, `/tags/${decodedSlug}`),
+    ...(shouldNoindexEnglish(locale, `/tags/${decodedSlug}`) && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 

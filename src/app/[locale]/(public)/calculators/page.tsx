@@ -17,7 +17,7 @@ export async function generateMetadata({
     description: t("description"),
     alternates: {
       canonical: `https://www.dadparvaran.com/${locale}/calculators`,
-      languages: { fa: "https://www.dadparvaran.com/fa/calculators", en: "https://www.dadparvaran.com/en/calculators" },
+      languages: { fa: "https://www.dadparvaran.com/fa/calculators", en: "https://www.dadparvaran.com/en/calculators", "x-default": "https://www.dadparvaran.com/fa/calculators" },
     },
   };
 }

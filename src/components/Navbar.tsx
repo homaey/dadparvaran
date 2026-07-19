@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { Menu, X, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hasCompleteEnglish } from "@/lib/i18n-pages";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -45,7 +46,12 @@ export default function Navbar() {
   ];
 
   const otherLocale = locale === "fa" ? "en" : "fa";
-  const switchPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+  const pathWithoutLocale = pathname.replace(/^\/(fa|en)/, "") || "";
+  const targetHasContent =
+    otherLocale === "fa" || hasCompleteEnglish(pathWithoutLocale);
+  const switchPath = targetHasContent
+    ? pathname.replace(`/${locale}`, `/${otherLocale}`)
+    : `/${otherLocale}`;
 
   return (
     <nav
@@ -110,18 +116,31 @@ export default function Navbar() {
           {/* Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {/* Locale switcher */}
-            <Link
-              href={switchPath}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                solid
-                  ? "text-gray-600 hover:text-primary-700 hover:bg-primary-50"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              )}
-            >
-              <Globe className="w-4 h-4" />
-              {locale === "fa" ? "EN" : "FA"}
-            </Link>
+            {targetHasContent ? (
+              <Link
+                href={switchPath}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  solid
+                    ? "text-gray-600 hover:text-primary-700 hover:bg-primary-50"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
+                )}
+              >
+                <Globe className="w-4 h-4" />
+                {locale === "fa" ? "EN" : "FA"}
+              </Link>
+            ) : (
+              <span
+                title={locale === "fa" ? "English version not available" : "نسخه فارسی در دسترس نیست"}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium opacity-40 cursor-not-allowed",
+                  solid ? "text-gray-400" : "text-white/40"
+                )}
+              >
+                <Globe className="w-4 h-4" />
+                {locale === "fa" ? "EN" : "FA"}
+              </span>
+            )}
             {/* CTA */}
             <Link
               href={`/${locale}/contact`}
@@ -165,14 +184,21 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-              <Link
-                href={switchPath}
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600"
-              >
-                <Globe className="w-4 h-4" />
-                {locale === "fa" ? "English" : "فارسی"}
-              </Link>
+              {targetHasContent ? (
+                <Link
+                  href={switchPath}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600"
+                >
+                  <Globe className="w-4 h-4" />
+                  {locale === "fa" ? "English" : "فارسی"}
+                </Link>
+              ) : (
+                <span className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 cursor-not-allowed">
+                  <Globe className="w-4 h-4" />
+                  {locale === "fa" ? "English" : "فارسی"}
+                </span>
+              )}
               <Link
                 href={`/${locale}/contact`}
                 onClick={() => setMobileOpen(false)}

@@ -8,6 +8,7 @@ import { getTagsForArticle } from "@/lib/team";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { toWhatsAppLink } from "@/lib/whatsapp";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -28,13 +29,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       images: article.coverImage ? [article.coverImage] : ["/og-image.jpg"],
       type: "article",
     },
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/articles/${slug}`,
-      languages: {
-        fa: `https://www.dadparvaran.com/fa/articles/${slug}`,
-        en: `https://www.dadparvaran.com/en/articles/${slug}`,
-      },
-    },
+    alternates: alternatesMetadata(locale, `/articles/${slug}`),
+    ...(shouldNoindexEnglish(locale, `/articles/${slug}`) && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 

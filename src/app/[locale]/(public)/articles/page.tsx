@@ -5,6 +5,7 @@ import { Clock, Tag, ArrowLeft, ArrowRight, BookOpen } from "lucide-react";
 import { db } from "@/lib/db";
 import { getBreadcrumbSchema } from "@/lib/schema";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
+import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
 export async function generateMetadata({
   params,
@@ -16,10 +17,10 @@ export async function generateMetadata({
   return {
     title: t("title"),
     description: t("description"),
-    alternates: {
-      canonical: `https://www.dadparvaran.com/${locale}/articles`,
-      languages: { fa: "https://www.dadparvaran.com/fa/articles", en: "https://www.dadparvaran.com/en/articles" },
-    },
+    alternates: alternatesMetadata(locale, "/articles"),
+    ...(shouldNoindexEnglish(locale, "/articles") && {
+      robots: { index: false, follow: true },
+    }),
   };
 }
 
