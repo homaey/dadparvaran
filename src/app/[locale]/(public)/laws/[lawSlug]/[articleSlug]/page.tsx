@@ -8,6 +8,18 @@ import type { Metadata } from "next";
 import { toPersianDigits } from "@/lib/utils";
 import { alternatesMetadata, shouldNoindexEnglish } from "@/lib/i18n-pages";
 
+/**
+ * متن ماده را به یک description خوانا و کوتاه تبدیل می‌کند.
+ * برش روی مرز واژه انجام می‌شود تا جمله وسط کلمه قطع نشود.
+ */
+function excerpt(text: string, max: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd() + "…";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -19,11 +31,25 @@ export async function generateMetadata({
   const article = await getLegalArticleBySlug(decodedLaw, decodedArticle);
   if (!article) return { title: "Not Found" };
 
+  // نام قانون باید در عنوان بیاید، وگرنه «ماده ۱» روی ده‌ها قانون مختلف عنوان
+  // یکسان می‌گیرد. بخش متمایزکننده اول می‌آید تا در صورت برش در SERP حفظ شود.
+  const lawTitle = article.law?.title;
+  const heading = lawTitle ? `${article.title} ${lawTitle}` : article.title;
+
+  // absolute استفاده می‌شود تا الگوی «| دادپروران مهر ایران» در layout اضافه نشود؛
+  // نام قوانین فارسی بلند است و عنوان از مرز نمایش SERP عبور می‌کند.
+  const title = `${heading} — دادپروران`;
+
+  const description = article.content
+    ? excerpt(`${heading}: ${article.content}`, 155)
+    : `${heading} — متن و تفسیر ماده قانونی`;
+
   return {
-    title: article.title,
-    description: `${article.title} — متن و تفسیر ماده قانونی`,
+    title: { absolute: title },
+    description,
     openGraph: {
-      title: article.title,
+      title,
+      description,
       type: "article",
       images: ["/og-image.jpg"],
     },
@@ -86,8 +112,15 @@ export default async function LegalArticlePage({
         </nav>
 
         <article dir="rtl" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-right font-fa">
+          {/* نام قانون داخل H1 می‌آید تا عنوان صفحه بافتار کامل داشته باشد؛
+              با وزن سبک‌تر رندر می‌شود تا سلسله‌مراتب بصری حفظ شود. */}
           <h1 className="text-xl sm:text-2xl font-bold text-primary-900 mb-6 font-fa">
             {toPersianDigits(article.title)}
+            {article.law?.title && (
+              <span className="block mt-1 text-base sm:text-lg font-medium text-gray-500">
+                {toPersianDigits(article.law.title)}
+              </span>
+            )}
           </h1>
 
           {article.content && (

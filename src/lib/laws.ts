@@ -50,7 +50,7 @@ export async function getLegalArticleBySlug(lawSlug: string, articleSlug: string
   const law = await getLawBySlug(lawSlug);
   if (!law) return null;
 
-  return db.legalNode.findFirst({
+  const node = await db.legalNode.findFirst({
     where: {
       slug: articleSlug,
       type: "ARTICLE",
@@ -63,6 +63,12 @@ export async function getLegalArticleBySlug(lawSlug: string, articleSlug: string
       },
     },
   });
+  if (!node) return null;
+
+  // قانونِ والد را ضمیمه می‌کنیم تا عنوان/H1/description بتوانند نام قانون را
+  // شامل شوند. اسکیما رابطه‌ی Prisma برای lawId ندارد، اما law همین‌جا از قبل
+  // واکشی شده است — پس این کار کوئری اضافه‌ای تحمیل نمی‌کند.
+  return { ...node, law };
 }
 
 export async function getAdjacentArticles(lawId: number, currentOrderIndex: number, parentId: number | null) {
