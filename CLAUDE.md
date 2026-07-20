@@ -83,7 +83,11 @@ Laws are stored as a tree in `LegalNode`. Hierarchy by `type` field with implied
 
 ## Deployment
 
-Server: `95.38.164.220`, user `ubuntu`, SSH key at `C:\Users\HOSSEINI\Desktop\ar-admin-privatekey.pem`. GitHub is unreachable from the server (Iranian network). Deploy flow: SCP files → remote `npm run build` → `pm2 restart legal-website`. App directory on server: `/var/www/dadparvaran`.
+Deployed to an Iranian server behind nginx + pm2. **GitHub is unreachable from that server**, so deployment is SCP-based, never `git pull`. Follow `docs/DEPLOY.md` — it is the only supported procedure.
+
+Host, SSH user, key path and env vars live in `docs/SERVER.private.md` (gitignored — never commit connection details or credentials to this repo).
+
+Two other things that host cannot reach, which shape the code: `api.telegram.org` (notifications therefore use Bale, `tapi.bale.ai`) and `fonts.googleapis.com` (build warns and falls back).
 
 ## Critical Rules
 

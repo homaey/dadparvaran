@@ -1,13 +1,29 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 const db = new PrismaClient();
+
+/**
+ * رمز seed از متغیر محیطی خوانده می‌شود. اگر تنظیم نشده باشد یک رمز تصادفی
+ * ساخته و چاپ می‌شود — تا هیچ رمز قابل حدسی در مخزن نماند و هر نصب تازه
+ * اعتبارنامه‌ی منحصربه‌فرد خودش را داشته باشد.
+ */
+function seedPassword(envVar: string, label: string): string {
+  const fromEnv = process.env[envVar];
+  if (fromEnv) return fromEnv;
+  const generated = crypto.randomBytes(12).toString("base64url");
+  generatedCredentials.push({ label, envVar, password: generated });
+  return generated;
+}
+
+const generatedCredentials: { label: string; envVar: string; password: string }[] = [];
 
 async function main() {
   console.log("Seeding database...");
 
   // ── Admin ──────────────────────────────────────────────────────────────
-  const adminPass = await bcrypt.hash("Admin@1234", 12);
+  const adminPass = await bcrypt.hash(seedPassword("SEED_ADMIN_PASSWORD", "ADMIN"), 12);
   const admin = await db.user.upsert({
     where: { email: "admin@legalfirm.ir" },
     update: {},
@@ -40,7 +56,7 @@ async function main() {
   console.log("Categories seeded");
 
   // ── Team Members ─────────────────────────────────────────────────────
-  const lawyerPass = await bcrypt.hash("Lawyer@1234", 12);
+  const lawyerPass = await bcrypt.hash(seedPassword("SEED_LAWYER_PASSWORD", "LAWYER"), 12);
   const lawyerUser = await db.user.upsert({
     where: { email: "lawyer@legalfirm.ir" },
     update: {},
@@ -991,9 +1007,21 @@ ${partyRows}
   });
 
   console.log("\nSeed complete!");
-  console.log("Login credentials:");
-  console.log("  Admin:  admin@legalfirm.ir  /  Admin@1234");
-  console.log("  Lawyer: lawyer@legalfirm.ir /  Lawyer@1234");
+  console.log("Accounts: admin@legalfirm.ir (ADMIN), lawyer@legalfirm.ir (LAWYER)");
+
+  if (generatedCredentials.length) {
+    console.log("\n" + "!".repeat(70));
+    console.log("رمزهای تصادفی ساخته شد — همین حالا ذخیره‌شان کنید، دوباره نمایش داده نمی‌شوند:");
+    for (const c of generatedCredentials) {
+      console.log(`  ${c.label.padEnd(7)} ${c.password}     (برای تکرارپذیری: ${c.envVar})`);
+    }
+    console.log("!".repeat(70));
+  } else {
+    console.log("رمزها از متغیرهای محیطی خوانده شدند.");
+  }
+
+  // نکته: upsert رمز حساب‌های موجود را بازنویسی نمی‌کند؛ رمزهای بالا فقط برای
+  // حساب‌هایی معتبرند که در همین اجرا ساخته شده‌اند.
 }
 
 main()

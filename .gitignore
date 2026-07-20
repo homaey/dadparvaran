@@ -11,6 +11,12 @@ dist/
 .env.local
 .env.*.local
 
+# server connection details / credentials — must never be committed
+docs/SERVER.private.md
+
+# contains full ssh commands with host + key path (launch.json is tracked on purpose)
+.claude/settings.local.json
+
 # database
 prisma/dev.db
 prisma/dev.db-journal

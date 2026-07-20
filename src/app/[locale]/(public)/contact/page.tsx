@@ -21,6 +21,8 @@ export default function ContactPage() {
       phone: (form.elements.namedItem("phone") as HTMLInputElement).value || undefined,
       email: (form.elements.namedItem("email") as HTMLInputElement).value,
       message: (form.elements.namedItem("message") as HTMLTextAreaElement).value,
+      // تله ربات — کاربر واقعی این را نمی‌بیند، پس همیشه خالی می‌ماند
+      website: (form.elements.namedItem("website") as HTMLInputElement)?.value || undefined,
     };
 
     try {
@@ -120,6 +122,15 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* تله ربات: از دید کاربر و صفحه‌خوان پنهان است؛ اگر پر شود سرور پیام را دور می‌ریزد */}
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="absolute w-px h-px -m-px overflow-hidden opacity-0 pointer-events-none"
+                  />
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">{t("form.name")}</label>

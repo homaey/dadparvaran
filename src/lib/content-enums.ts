@@ -27,7 +27,7 @@ export type NotificationType = (typeof NotificationType)[keyof typeof Notificati
 
 export const NotificationChannel = {
   IN_APP: "IN_APP",
-  TELEGRAM: "TELEGRAM",
+  BALE: "BALE",
 } as const;
 export type NotificationChannel = (typeof NotificationChannel)[keyof typeof NotificationChannel];
 
