@@ -4,7 +4,6 @@ import Hero from "@/components/sections/Hero";
 import Services from "@/components/sections/Services";
 import LawyersSection from "@/components/sections/LawyersSection";
 import ArticlesSection from "@/components/sections/ArticlesSection";
-import LawyerCTASection from "@/components/sections/LawyerCTASection";
 import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
 import FAQSection from "@/components/sections/FAQSection";
 import { getFAQSchema, getBreadcrumbSchema } from "@/lib/schema";
@@ -95,7 +94,6 @@ export default async function HomePage({
       <LawyersSection members={teamMembers} />
       {locale === "fa" && <ArticlesSection articles={articlesData} />}
       <ContactLawyersCTA />
-      <LawyerCTASection />
       <FAQSection />
     </>
   );

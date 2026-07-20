@@ -1,88 +1,67 @@
+import { offices, primaryOffice, type Office } from "@/lib/offices";
+
+const INSTITUTE_NAME = {
+  fa: "مؤسسه حقوقی دادپروران مهر ایران",
+  en: "Dadparvaraan Mehr Iran Legal Institute",
+} as const;
+
+// sameAs عمداً خالی است تا وقتی آدرس‌های واقعی پیج‌های اجتماعی از کاربر
+// نرسیده، schema به پروفایل‌های ناموجود اشاره نکند (که پیش‌تر می‌کرد و
+// تناقض با UI ایجاد می‌کرد چون آیکون‌های فوتر href="#" بودند).
+const SAME_AS: string[] = [];
+
+function localeText(loc: string, bilingual: { fa: string; en: string }): string {
+  return loc === "fa" ? bilingual.fa : bilingual.en;
+}
+
+function officeAddress(office: Office, locale: string) {
+  return {
+    "@type": "PostalAddress" as const,
+    streetAddress: localeText(locale, office.street),
+    addressLocality: localeText(locale, office.city),
+    addressRegion: localeText(locale, office.region),
+    addressCountry: "IR",
+  };
+}
+
 export function getLegalServiceSchema(locale: string) {
-  const isFA = locale === "fa";
+  const main = primaryOffice();
   return {
     "@context": "https://schema.org",
     "@type": "LegalService",
-    name: isFA ? "مؤسسه حقوقی دادپروران مهر ایران" : "Dadparvaraan Mehr Iran Legal Institute",
-    description: isFA
-      ? "ارائه خدمات حقوقی تخصصی با بیش از ۲۰ سال تجربه"
-      : "Specialized legal services with over 20 years of experience",
+    name: localeText(locale, INSTITUTE_NAME),
+    description:
+      locale === "fa"
+        ? "ارائه خدمات حقوقی تخصصی با بیش از ۲۰ سال تجربه"
+        : "Specialized legal services with over 20 years of experience",
     url: `https://www.dadparvaran.com/${locale}`,
-    telephone: "+986191010285",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: isFA
-        ? "خیابان مطهری، سلیمان‌خاطر، کوچه مسجد، پلاک ۱۹، واحد ۸"
-        : "Motahhari St., Soleimankhater, Masjed Alley, No. 19, Unit 8",
-      addressLocality: isFA ? "تهران" : "Tehran",
-      addressRegion: isFA ? "تهران" : "Tehran",
-      addressCountry: "IR",
-    },
+    telephone: main.phone,
+    address: officeAddress(main, locale),
     openingHours: ["Sa-We 08:00-17:00", "Th 08:00-13:00"],
     priceRange: "$$",
-    sameAs: [
-      "https://instagram.com/dadparvaran",
-      "https://linkedin.com/company/dadparvaran",
-    ],
-    areaServed: {
-      "@type": "Country",
-      name: "Iran",
-    },
+    sameAs: SAME_AS,
+    areaServed: { "@type": "Country", name: "Iran" },
   };
 }
 
 export function getLocalBusinessSchema(locale: string) {
-  const isFA = locale === "fa";
-  const branches = [
-    {
-      id: "tehran",
-      name: isFA ? "دفتر تهران — دادپروران مهر ایران" : "Tehran Office — Dadparvaran Mehr Iran",
-      street: isFA
-        ? "خیابان مطهری، سلیمان‌خاطر، کوچه مسجد، پلاک ۱۹، واحد ۸"
-        : "Motahhari St., Soleimankhater, Masjed Alley, No. 19, Unit 8",
-      city: isFA ? "تهران" : "Tehran",
-      region: isFA ? "تهران" : "Tehran",
-    },
-    {
-      id: "ahvaz",
-      name: isFA ? "دفتر اهواز — دادپروران مهر ایران" : "Ahvaz Office — Dadparvaran Mehr Iran",
-      street: isFA
-        ? "کیانپارس، خیابان ۱۴ غربی، فاز ۱، مجتمع برج کیانپارس، طبقه ۸، واحد ۱"
-        : "Kianpars, 14th West St., Phase 1, Kianpars Tower, Floor 8, Unit 1",
-      city: isFA ? "اهواز" : "Ahvaz",
-      region: isFA ? "خوزستان" : "Khuzestan",
-    },
-    {
-      id: "andimeshk",
-      name: isFA ? "دفتر اندیمشک — دادپروران مهر ایران" : "Andimeshk Office — Dadparvaran Mehr Iran",
-      street: isFA
-        ? "خیابان پناهی، طبقه دوم، پاساژ آبادی"
-        : "Panahi St., 2nd Floor, Abadi Passage",
-      city: isFA ? "اندیمشک" : "Andimeshk",
-      region: isFA ? "خوزستان" : "Khuzestan",
-    },
-  ];
+  const officeLabel = locale === "fa" ? "دفتر" : "Office";
+  const dash = locale === "fa" ? "—" : "—";
 
-  return branches.map((branch) => ({
+  return offices.map((office) => ({
     "@context": "https://schema.org",
     "@type": "LegalService",
-    "@id": `https://www.dadparvaran.com/${locale}#${branch.id}`,
-    name: branch.name,
+    "@id": `https://www.dadparvaran.com/${locale}#${office.id}`,
+    name: `${officeLabel} ${localeText(locale, office.city)} ${dash} ${localeText(locale, INSTITUTE_NAME)}`,
     url: `https://www.dadparvaran.com/${locale}`,
-    telephone: "+986191010285",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: branch.street,
-      addressLocality: branch.city,
-      addressRegion: branch.region,
-      addressCountry: "IR",
-    },
+    telephone: office.phone,
+    address: officeAddress(office, locale),
     openingHours: ["Sa-We 08:00-17:00", "Th 08:00-13:00"],
     priceRange: "$$",
     areaServed: { "@type": "Country", name: "Iran" },
     parentOrganization: {
       "@type": "Organization",
-      name: isFA ? "مؤسسه حقوقی دادپروران مهر ایران" : "Dadparvaraan Mehr Iran Legal Institute",
+      name: localeText(locale, INSTITUTE_NAME),
     },
   }));
 }

@@ -6,6 +6,7 @@ import { Vazirmatn } from "next/font/google";
 import { Inter, Playfair_Display } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import SessionProvider from "@/components/SessionProvider";
+import Analytics from "@/components/Analytics";
 import { getLegalServiceSchema, getLocalBusinessSchema } from "@/lib/schema";
 import "../globals.css";
 
@@ -132,6 +133,7 @@ export default async function LocaleLayout({
             {children}
           </SessionProvider>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

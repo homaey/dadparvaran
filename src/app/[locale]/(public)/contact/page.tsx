@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { MapPin, Phone, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Clock, CheckCircle2, ExternalLink } from "lucide-react";
+import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
+import { offices } from "@/lib/offices";
+import { toWhatsAppLink } from "@/lib/whatsapp";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
@@ -40,11 +43,7 @@ export default function ContactPage() {
     }
   }
 
-  const contactItems = [
-    { icon: MapPin, label: t("address"), value: t("addressValue") },
-    { icon: Phone, label: t("phone"), value: t("phoneValue"), href: "tel:+986191010285" },
-    { icon: Clock, label: t("hours"), value: t("hoursValue") },
-  ];
+  const lang = isRTL ? "fa" : "en";
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"}>
@@ -61,41 +60,86 @@ export default function ContactPage() {
         </div>
       </section>
 
+      {/* سه کارت شعبه — منبع همه از src/lib/offices.ts. تناقض NAP قدیمی
+          (آدرس تهران/تلفن کد اهواز) با این ساختار غیرممکن است. */}
+      <section className="py-16 bg-gray-50 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className={`text-2xl font-bold text-primary-900 mb-8 text-center ${isRTL ? "font-fa" : "font-serif"}`}>
+            {isRTL ? "دفاتر ما" : "Our Offices"}
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {offices.map((office) => {
+              const waLink = office.whatsapp ? toWhatsAppLink(office.whatsapp) : null;
+              return (
+                <div key={office.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+                  <h3 className={`text-lg font-bold text-primary-900 mb-4 ${isRTL ? "font-fa" : "font-serif"}`}>
+                    {isRTL ? `دفتر ${office.city.fa}` : `${office.city.en} Office`}
+                  </h3>
+                  <div className="space-y-3 text-sm flex-1">
+                    <div className="flex items-start gap-2.5">
+                      <MapPin className="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />
+                      <span className="text-gray-700 leading-relaxed">{office.street[lang]}</span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="w-4 h-4 text-primary-600 shrink-0" />
+                      <a
+                        href={`tel:${office.phone}`}
+                        className="text-gray-700 hover:text-primary-700 transition-colors font-medium"
+                        dir="ltr"
+                      >
+                        {office.phoneDisplay[lang]}
+                      </a>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <Clock className="w-4 h-4 text-primary-600 mt-0.5 shrink-0" />
+                      <span className="text-gray-600 text-xs leading-relaxed">{office.hours[lang]}</span>
+                    </div>
+                  </div>
+                  {/* دکمه‌های اقدام — mapUrl و whatsapp اختیاری‌اند و اگر تنظیم نشدند، رندر نمی‌شوند. */}
+                  <div className="flex gap-2 mt-5 pt-4 border-t border-gray-100">
+                    {office.mapUrl && (
+                      <a
+                        href={office.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 bg-primary-50 hover:bg-primary-100 text-primary-700 text-xs font-medium px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        {isRTL ? "مسیریابی" : "Directions"}
+                      </a>
+                    )}
+                    {waLink && (
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="WhatsApp"
+                        className="inline-flex items-center justify-center bg-green-50 hover:bg-green-100 text-green-700 px-3 py-2 rounded-lg transition-colors"
+                      >
+                        <WhatsAppIcon className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <section className="py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* Contact info */}
+            {/* Contact hint */}
             <div>
-              <h2 className={`text-2xl font-bold text-primary-900 mb-8 ${isRTL ? "font-fa" : "font-serif"}`}>
-                {isRTL ? "اطلاعات تماس" : "Contact Information"}
+              <h2 className={`text-2xl font-bold text-primary-900 mb-4 ${isRTL ? "font-fa" : "font-serif"}`}>
+                {isRTL ? "چطور کمک کنیم؟" : "How Can We Help?"}
               </h2>
-              <div className="space-y-6">
-                {contactItems.map(({ icon: Icon, label, value, href }) => (
-                  <div key={label} className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center shrink-0">
-                      <Icon className="w-5 h-5 text-primary-700" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">{label}</p>
-                      {href ? (
-                        <a href={href} className="text-gray-700 hover:text-primary-700 transition-colors font-medium">
-                          {value}
-                        </a>
-                      ) : (
-                        <p className="text-gray-700 font-medium">{value}</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Map placeholder */}
-              <div className="mt-10 h-64 bg-gray-100 rounded-2xl flex items-center justify-center border border-gray-200">
-                <div className="text-center text-gray-400">
-                  <MapPin className="w-10 h-10 mx-auto mb-2" />
-                  <p className="text-sm">{isRTL ? "نقشه در نسخه نهایی نمایش داده می‌شود" : "Map will be displayed in final version"}</p>
-                </div>
-              </div>
+              <p className="text-gray-600 leading-relaxed">
+                {isRTL
+                  ? "اگر ترجیح می‌دهید ابتدا موضوع پرونده را بنویسید، پیام خود را از این طریق برای ما بفرستید. تیم ما در ساعات کاری در اسرع وقت پاسخ می‌دهد."
+                  : "Prefer to describe your case first? Send us a message and our team will get back to you during business hours."}
+              </p>
             </div>
 
             {/* Contact form */}

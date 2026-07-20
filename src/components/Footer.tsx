@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Phone, MapPin, Instagram, Linkedin, Twitter } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
+import { primaryOffice } from "@/lib/offices";
 
 export default function Footer() {
   const t = useTranslations("footer");
   const tContact = useTranslations("contact");
   const locale = useLocale();
   const isRTL = locale === "fa";
+  const office = primaryOffice();
+  const lang = isRTL ? "fa" : "en";
 
   return (
     <footer
@@ -29,20 +32,12 @@ export default function Footer() {
                 </span>
               </div>
             </Link>
-            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+            <p className="text-gray-400 text-sm leading-relaxed">
               {t("description")}
             </p>
-            <div className="flex items-center gap-3">
-              {[Instagram, Linkedin, Twitter].map((Icon, i) => (
-                <a
-                  key={i}
-                  href="#"
-                  className="w-9 h-9 bg-white/10 hover:bg-gold-500 rounded-lg flex items-center justify-center transition-colors"
-                >
-                  <Icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div>
+            {/* آیکون‌های سوشال حذف شدند — پیش‌تر href="#" داشتند و کاربر را
+                به همان صفحه برمی‌گرداندند. وقتی آدرس واقعی پیج‌ها آماده شود،
+                این‌جا هم‌زمان با sameAs در schema.ts اضافه می‌شود. */}
           </div>
 
           {/* Quick Links */}
@@ -100,12 +95,15 @@ export default function Footer() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-gold-400 mt-0.5 shrink-0" />
-                <span className="text-gray-400 text-sm">{tContact("addressValue")}</span>
+                <span className="text-gray-400 text-sm">
+                  {isRTL ? `دفتر ${office.city.fa}: ` : `${office.city.en}: `}
+                  {office.street[lang]}
+                </span>
               </li>
               <li className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-gold-400 shrink-0" />
-                <a href="tel:+986191010285" className="text-gray-400 hover:text-gold-400 text-sm transition-colors">
-                  {tContact("phoneValue")}
+                <a href={`tel:${office.phone}`} className="text-gray-400 hover:text-gold-400 text-sm transition-colors" dir="ltr">
+                  {office.phoneDisplay[lang]}
                 </a>
               </li>
             </ul>

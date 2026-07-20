@@ -106,13 +106,9 @@
     "title": "Contact Us",
     "subtitle": "Contact us for a free consultation",
     "address": "Address",
-    "addressValue": "Tehran, Motahhari St., Soleimankhater, Masjed Alley, No. 19, Unit 8",
     "phone": "Phone",
-    "phoneValue": "+98 61 9101 0285",
     "email": "Email",
-    "emailValue": "info@dadparvaran.com",
     "hours": "Working Hours",
-    "hoursValue": "Sat–Wed: 8AM–5PM | Thu: 8AM–1PM",
     "form": {
       "name": "Full Name",
       "email": "Email",
