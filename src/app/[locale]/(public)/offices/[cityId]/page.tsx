@@ -179,26 +179,34 @@ export default async function OfficeCityPage({
             وکیل در {cityFA}
           </h1>
           <p className="text-gray-200 text-lg leading-relaxed max-w-3xl">{intro}</p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a
-              href={`tel:${office.phone}`}
-              className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-primary-950 font-bold px-6 py-3 rounded-xl transition-colors"
-              dir="ltr"
+          {/* CTAهای Hero — دقیقاً همان الگوی صفحات خدمات: دکمه‌ی طلایی بزرگ +
+              واتساپ رنگ برند + دکمه‌ی ثانویه‌ی شیشه‌ای. شماره‌ی مستقیم دفتر
+              چند سطر پایین‌تر در کارت NAP قابل تماس است. */}
+          <div className="flex flex-wrap gap-4 mt-8">
+            <Link
+              href="/fa/contact"
+              className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
-              <Phone className="w-4 h-4" />
-              {office.phoneDisplay.fa}
-            </a>
+              <Phone className="w-5 h-5" />
+              مشاوره رایگان
+            </Link>
             {waHref && (
               <a
                 href={waHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3 rounded-xl transition-colors"
+                className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1da851] text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-[#25D366]/25"
               >
                 <WhatsAppIcon className="w-5 h-5" />
-                واتساپ
+                مشاوره واتساپ
               </a>
             )}
+            <Link
+              href="/fa/offices"
+              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all backdrop-blur-sm"
+            >
+              سایر دفاتر
+            </Link>
           </div>
         </div>
       </section>
