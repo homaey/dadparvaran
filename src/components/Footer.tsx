@@ -52,6 +52,9 @@ export default function Footer() {
                 ] : []),
                 { href: `/${locale}/lawyers`, label: isRTL ? "تیم ما" : "Our Team" },
                 { href: `/${locale}/services`, label: isRTL ? "خدمات" : "Services" },
+                // «دفاتر ما» فقط FA — صفحات شهری فقط فارسی هستند و middleware
+                // /en/offices را به /fa/offices ریدایرکت می‌کند.
+                ...(isRTL ? [{ href: `/${locale}/offices`, label: "دفاتر ما" }] : []),
               ].map((link) => (
                 <li key={link.href}>
                   <Link

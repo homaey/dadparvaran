@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Phone, Clock, CheckCircle2, ExternalLink } from "lucide-react";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
@@ -64,9 +65,17 @@ export default function ContactPage() {
           (آدرس تهران/تلفن کد اهواز) با این ساختار غیرممکن است. */}
       <section className="py-16 bg-gray-50 border-b border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className={`text-2xl font-bold text-primary-900 mb-8 text-center ${isRTL ? "font-fa" : "font-serif"}`}>
+          <h2 className={`text-2xl font-bold text-primary-900 mb-3 text-center ${isRTL ? "font-fa" : "font-serif"}`}>
             {isRTL ? "دفاتر ما" : "Our Offices"}
           </h2>
+          {isRTL && (
+            <p className="text-center text-sm text-gray-500 mb-8">
+              <Link href="/fa/offices" className="text-primary-700 hover:text-primary-800 font-medium underline underline-offset-4">
+                مشاهده صفحه اختصاصی هر دفتر ←
+              </Link>
+            </p>
+          )}
+          {!isRTL && <div className="mb-8" />}
           <div className="grid md:grid-cols-3 gap-6">
             {offices.map((office) => {
               const waLink = office.whatsapp ? toWhatsAppLink(office.whatsapp) : null;

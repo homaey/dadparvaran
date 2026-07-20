@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { PrismaClient } from "@prisma/client";
 import { servicesData } from "@/lib/services-data";
 import { hasCompleteEnglish } from "@/lib/i18n-pages";
+import { offices } from "@/lib/offices";
 
 const BASE_URL = "https://www.dadparvaran.com";
 const ALL_LOCALES = ["fa", "en"] as const;
@@ -144,9 +145,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
   } catch {}
 
+  // صفحات شهری فقط FA — اولویت بالا چون هدف زودبازده‌ترین کلمات کلیدی است
+  // («وکیل در اهواز» و «وکیل در اندیمشک» رقابت به‌مراتب پایین‌تر از تهران).
+  const officeEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/fa/offices`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    ...offices.map((o) => ({
+      url: `${BASE_URL}/fa/offices/${o.id}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.9,
+    })),
+  ];
+
   return [
     ...staticEntries,
     ...serviceEntries,
+    ...officeEntries,
     ...articleEntries,
     ...calcEntries,
     ...lawEntries,
