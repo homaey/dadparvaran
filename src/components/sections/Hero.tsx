@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeft, ArrowRight, Shield, Award, Users, Briefcase } from "lucide-react";
 import { getSiteSettings } from "@/lib/siteSettings";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 export default async function Hero({ locale }: { locale: string }) {
   const t = await getTranslations({ locale, namespace: "hero" });
@@ -61,13 +62,14 @@ export default async function Hero({ locale }: { locale: string }) {
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Link
-                href={`/${locale}/contact`}
+              <a
+                href={consultationHref(locale)}
+                {...consultationLinkProps()}
                 className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25 hover:shadow-gold-400/30 hover:-translate-y-0.5"
               >
-                {t("cta")}
+                {isBaleConsultation() ? (isRTL ? "درخواست مشاوره در بله" : "Consult via Bale") : t("cta")}
                 <Arrow className="w-5 h-5" />
-              </Link>
+              </a>
               <Link
                 href={isRTL ? `/${locale}/laws` : `/${locale}/services`}
                 className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-xl font-semibold transition-all backdrop-blur-sm"

@@ -4,6 +4,7 @@ import { Phone, Award, ArrowLeft, ArrowRight, Scale, MessageSquare } from "lucid
 import { db } from "@/lib/db";
 import { toWhatsAppLink } from "@/lib/whatsapp";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 type Lawyer = {
   id: number;
@@ -116,13 +117,14 @@ export default async function ContactLawyersCTA({
             </div>
           ))}
         </div>
-        <Link
-          href={`/${locale}/contact`}
+        <a
+          href={consultationHref(locale)}
+          {...consultationLinkProps()}
           className="mt-4 w-full flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition-colors"
         >
           <MessageSquare className="w-3.5 h-3.5" />
-          {isRTL ? "ارسال پیام" : "Send Message"}
-        </Link>
+          {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Bale") : (isRTL ? "ارسال پیام" : "Send Message")}
+        </a>
       </div>
     );
   }
@@ -221,13 +223,14 @@ export default async function ContactLawyersCTA({
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            href={`/${locale}/contact`}
+          <a
+            href={consultationHref(locale)}
+            {...consultationLinkProps()}
             className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-white px-8 py-3.5 rounded-xl font-semibold transition-colors cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
-            {isRTL ? "ارسال پیام مشاوره" : "Send Consultation Message"}
-          </Link>
+            {isBaleConsultation() ? (isRTL ? "درخواست مشاوره در بله" : "Consult via Bale") : (isRTL ? "ارسال پیام مشاوره" : "Send Consultation Message")}
+          </a>
           <Link
             href={`/${locale}/lawyers`}
             className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3.5 rounded-xl font-medium transition-colors cursor-pointer"

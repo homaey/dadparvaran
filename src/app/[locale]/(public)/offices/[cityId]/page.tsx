@@ -17,6 +17,7 @@ import {
 import { toWhatsAppLink } from "@/lib/whatsapp";
 import { servicesData } from "@/lib/services-data";
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 // نگاشت hardcoded شهر → slug خدمات پرتقاضا. جای اینکه از داده‌ی صفحات
 // خدمات mine کنیم، شش خدمت اصلی را برای هر شهر یکسان می‌گذاریم — چون در
@@ -183,13 +184,14 @@ export default async function OfficeCityPage({
               واتساپ رنگ برند + دکمه‌ی ثانویه‌ی شیشه‌ای. شماره‌ی مستقیم دفتر
               چند سطر پایین‌تر در کارت NAP قابل تماس است. */}
           <div className="flex flex-wrap gap-4 mt-8">
-            <Link
-              href="/fa/contact"
+            <a
+              href={consultationHref("fa")}
+              {...consultationLinkProps()}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              مشاوره رایگان
-            </Link>
+              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+            </a>
             {waHref && (
               <a
                 href={waHref}

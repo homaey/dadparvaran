@@ -8,6 +8,7 @@ import ContactLawyersCTA from "@/components/sections/ContactLawyersCTA";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { toWhatsAppLink } from "@/lib/whatsapp";
 import { db } from "@/lib/db";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 export async function generateStaticParams() {
   return servicesData.map((s) => ({ slug: s.slug }));
@@ -99,13 +100,14 @@ export default async function ServiceDetailPage({
               {isRTL ? service.heroDescFA : service.heroDescEN}
             </p>
             <div className="flex flex-wrap justify-center gap-4 mt-8">
-              <Link
-                href={`/${locale}/contact`}
+              <a
+                href={consultationHref(locale)}
+                {...consultationLinkProps()}
                 className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
               >
                 <Phone className="w-5 h-5" />
-                {isRTL ? "مشاوره رایگان" : "Free Consultation"}
-              </Link>
+                {isBaleConsultation() ? (isRTL ? "درخواست مشاوره در بله" : "Consult via Bale") : (isRTL ? "مشاوره رایگان" : "Free Consultation")}
+              </a>
               {whatsappHref && (
                 <a
                   href={whatsappHref}

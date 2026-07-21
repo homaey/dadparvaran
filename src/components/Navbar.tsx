@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { hasCompleteEnglish } from "@/lib/i18n-pages";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -165,13 +166,14 @@ export default function Navbar() {
                 {locale === "fa" ? "EN" : "FA"}
               </span>
             )}
-            {/* CTA */}
-            <Link
-              href={`/${locale}/contact`}
+            {/* CTA — routes to Bale bot when configured, contact page otherwise */}
+            <a
+              href={consultationHref(locale)}
+              {...consultationLinkProps()}
               className="bg-gold-500 hover:bg-gold-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md"
             >
-              {t("consultation")}
-            </Link>
+              {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Consult via Bale") : t("consultation")}
+            </a>
           </div>
 
           {/* Mobile toggle */}
@@ -247,13 +249,14 @@ export default function Navbar() {
                   {locale === "fa" ? "English" : "فارسی"}
                 </span>
               )}
-              <Link
-                href={`/${locale}/contact`}
+              <a
+                href={consultationHref(locale)}
+                {...consultationLinkProps()}
                 onClick={() => setMobileOpen(false)}
                 className="bg-gold-500 text-white px-5 py-2 rounded-lg text-sm font-semibold"
               >
-                {t("consultation")}
-              </Link>
+                {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Bale") : t("consultation")}
+              </a>
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 export const metadata: Metadata = {
   title: "هزینه‌ها و حق‌الوکاله | مؤسسه حقوقی دادپروران مهر ایران",
@@ -115,13 +116,14 @@ export default function FeesPage() {
           </p>
           {/* CTA — الگوی مشترک صفحات: طلایی + واتساپ برند + شیشه‌ای ثانویه */}
           <div className="flex flex-wrap gap-4 mt-8">
-            <Link
-              href="/fa/contact"
+            <a
+              href={consultationHref("fa")}
+              {...consultationLinkProps()}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              مشاوره رایگان
-            </Link>
+              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+            </a>
             {waHref && (
               <a
                 href={waHref}
@@ -243,13 +245,14 @@ export default function FeesPage() {
             جلسه‌ی اول مشاوره رایگان است. با تیم ما تماس بگیرید یا پیام بگذارید تا با شنیدن شرح موضوع، هزینه‌ی دقیق و مسیر پیش‌رو را برایتان روشن کنیم.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/fa/contact"
+            <a
+              href={consultationHref("fa")}
+              {...consultationLinkProps()}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              مشاوره رایگان
-            </Link>
+              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+            </a>
             {waHref && (
               <a
                 href={waHref}

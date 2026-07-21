@@ -7,6 +7,7 @@ import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
+import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
 
 export const metadata: Metadata = {
   title: "پرسش‌های متداول — راهنمای کامل حقوقی | دادپروران مهر ایران",
@@ -188,13 +189,14 @@ export default function FaqPage() {
             پاسخ‌های کوتاه و دقیق به پرسش‌های پرتکرار حقوقی — از هزینه‌ها و روند همکاری تا خانواده، ملکی، کیفری و مطالبات مالی. اگر پاسخ سؤال شما این‌جا نیست، جلسه‌ی مشاوره‌ی اول رایگان است.
           </p>
           <div className="flex flex-wrap gap-4 mt-8">
-            <Link
-              href="/fa/contact"
+            <a
+              href={consultationHref("fa")}
+              {...consultationLinkProps()}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              مشاوره رایگان
-            </Link>
+              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+            </a>
             {waHref && (
               <a
                 href={waHref}
@@ -273,13 +275,14 @@ export default function FaqPage() {
             جلسه‌ی مشاوره‌ی اول رایگان است. تماس تلفنی یا پیام واتساپ، هر کدام راحت‌تر است، انتخاب کنید.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link
-              href="/fa/contact"
+            <a
+              href={consultationHref("fa")}
+              {...consultationLinkProps()}
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              مشاوره رایگان
-            </Link>
+              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+            </a>
             {waHref && (
               <a
                 href={waHref}
