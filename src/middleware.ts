@@ -6,7 +6,7 @@ import { shouldNoindexEnglish } from "./lib/i18n-pages";
 const intlMiddleware = createMiddleware(routing);
 
 // مسیرهایی که محتوای اصلی‌شان فقط فارسی است — ریدایرکت به /fa
-const FA_ONLY_PREFIXES = ["/en/articles", "/en/laws", "/en/forms", "/en/tags", "/en/offices"];
+const FA_ONLY_PREFIXES = ["/en/articles", "/en/laws", "/en/forms", "/en/tags", "/en/offices", "/en/fees", "/en/faq"];
 
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

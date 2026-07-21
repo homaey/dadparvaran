@@ -162,10 +162,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   ];
 
+  // صفحات اعتماد (fees + faq) — فقط FA. fees اولویت بالاتر چون پرکاربردترین
+  // حوزه‌ی جست‌وجوی تازه‌کاران به سایت است.
+  const trustEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/fa/fees`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/fa/faq`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.75,
+    },
+  ];
+
   return [
     ...staticEntries,
     ...serviceEntries,
     ...officeEntries,
+    ...trustEntries,
     ...articleEntries,
     ...calcEntries,
     ...lawEntries,

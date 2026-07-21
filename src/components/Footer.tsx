@@ -74,8 +74,11 @@ export default function Footer() {
             <ul className="space-y-3">
               {[
                 { href: `/${locale}/calculators`, label: isRTL ? "ماشین‌حساب‌ها" : "Calculators" },
+                // fees + faq فقط FA (صفحات‌شان فقط فارسی است، middleware /en را ریدایرکت می‌کند)
                 ...(isRTL ? [
                   { href: `/${locale}/forms`, label: "اوراق قضایی" },
+                  { href: `/${locale}/fees`, label: "هزینه‌ها و حق‌الوکاله" },
+                  { href: `/${locale}/faq`, label: "پرسش‌های متداول" },
                 ] : []),
                 { href: `/${locale}/about`, label: isRTL ? "درباره ما" : "About Us" },
                 { href: `/${locale}/contact`, label: isRTL ? "تماس با ما" : "Contact Us" },
