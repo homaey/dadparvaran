@@ -1,0 +1,63 @@
+export const CONSULTATION_STATUSES = [
+  "DRAFT",
+  "OPEN",
+  "ASSIGNED",
+  "HANDOFF_SENT",
+  "CONTACTED",
+  "UNDER_REVIEW",
+  "QUALIFIED",
+  "NOT_A_FIT",
+  "REFERRED",
+  "CLOSED",
+  "CANCELLED",
+] as const;
+
+export type ConsultationStatus = (typeof CONSULTATION_STATUSES)[number];
+
+export const ACTIVE_LAWYER_REQUEST_STATUSES: ConsultationStatus[] = [
+  "ASSIGNED",
+  "HANDOFF_SENT",
+  "CONTACTED",
+  "UNDER_REVIEW",
+  "QUALIFIED",
+];
+
+export const CONSULTATION_EVENT_TYPES = {
+  REQUEST_CREATED: "REQUEST_CREATED",
+  POSTED_TO_GROUP: "POSTED_TO_GROUP",
+  POST_TO_GROUP_FAILED: "POST_TO_GROUP_FAILED",
+  CLAIM_ATTEMPTED: "CLAIM_ATTEMPTED",
+  CLAIM_SUCCEEDED: "CLAIM_SUCCEEDED",
+  CLAIM_REJECTED: "CLAIM_REJECTED",
+  HANDOFF_SENT: "HANDOFF_SENT",
+  HANDOFF_FAILED: "HANDOFF_FAILED",
+  CONTACT_CONFIRMED: "CONTACT_CONFIRMED",
+  NO_ANSWER_REPORTED: "NO_ANSWER_REPORTED",
+  RETURNED_TO_ADMIN: "RETURNED_TO_ADMIN",
+  MARKED_NOT_A_FIT: "MARKED_NOT_A_FIT",
+  CLOSED: "CLOSED",
+  ADMIN_UPDATED: "ADMIN_UPDATED",
+  LAWYER_LINKED: "LAWYER_LINKED",
+} as const;
+
+export const ALLOWED_STATUS_TRANSITIONS: Record<ConsultationStatus, ConsultationStatus[]> = {
+  DRAFT: ["OPEN", "CANCELLED"],
+  OPEN: ["ASSIGNED", "CANCELLED"],
+  ASSIGNED: ["HANDOFF_SENT", "CONTACTED", "NOT_A_FIT", "REFERRED", "CLOSED"],
+  HANDOFF_SENT: ["CONTACTED", "NOT_A_FIT", "REFERRED", "CLOSED"],
+  CONTACTED: ["UNDER_REVIEW", "QUALIFIED", "NOT_A_FIT", "REFERRED", "CLOSED"],
+  UNDER_REVIEW: ["QUALIFIED", "NOT_A_FIT", "REFERRED", "CLOSED"],
+  QUALIFIED: ["CLOSED", "REFERRED"],
+  NOT_A_FIT: ["REFERRED", "CLOSED", "OPEN"],
+  REFERRED: ["OPEN", "ASSIGNED", "CLOSED"],
+  CLOSED: [],
+  CANCELLED: ["OPEN"],
+};
+
+export function isConsultationStatus(value: string): value is ConsultationStatus {
+  return (CONSULTATION_STATUSES as readonly string[]).includes(value);
+}
+
+export function canTransition(from: ConsultationStatus, to: ConsultationStatus): boolean {
+  return from === to || ALLOWED_STATUS_TRANSITIONS[from].includes(to);
+}

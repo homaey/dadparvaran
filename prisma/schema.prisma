@@ -62,8 +62,11 @@ model TeamMember {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  articles Article[]
+  user                  User?                       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  articles              Article[]
+  baleAccount           LawyerBaleAccount?
+  assignedConsultations ConsultationRequest[]       @relation("AssignedLawyer")
+  baleActivationCodes   LawyerBaleActivationCode[]
 }
 
 // ─── مقالات ────────────────────────────────────────────────────────────────
@@ -514,4 +517,120 @@ model ArticleBlockGeneration {
   block           ArticleBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
 
   @@index([blockId, createdAt])
+}
+
+// ─── Bale consultation intake and lawyer handoff ─────────────────────────
+
+
+model ConsultationRequest {
+  id                 Int       @id @default(autoincrement())
+  publicCode         String    @unique
+  claimToken         String    @unique
+  source             String    @default("BALE_MINIAPP")
+  status             String    @default("OPEN")
+  userBaleId         String
+  userBaleUsername   String?
+  clientName         String
+  phone              String?
+  category           String
+  subCategory        String?
+  city               String
+  clientRole         String?
+  caseStage          String
+  urgency            String
+  summary            String
+  assignedLawyerId   Int?
+  acceptedAt         DateTime?
+  handoffSentAt      DateTime?
+  contactedAt        DateTime?
+  closedAt           DateTime?
+  groupChatId        String?
+  groupMessageId     String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  assignedLawyer     TeamMember?           @relation("AssignedLawyer", fields: [assignedLawyerId], references: [id], onDelete: SetNull)
+  events             ConsultationEvent[]
+  deliveries         NotificationDelivery[]
+
+  @@index([status, createdAt])
+  @@index([assignedLawyerId, status])
+  @@index([userBaleId, createdAt])
+}
+
+model LawyerBaleAccount {
+  id                 Int       @id @default(autoincrement())
+  lawyerId           Int       @unique
+  baleUserId         String    @unique
+  baleUsername       String?
+  balePublicChatUrl  String
+  isVerified         Boolean   @default(false)
+  isActive           Boolean   @default(true)
+  isAvailable        Boolean   @default(true)
+  maxOpenRequests    Int       @default(5)
+  allowedCategories  String    @default("[]")
+  verifiedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  lawyer             TeamMember @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+
+  @@index([isActive, isAvailable])
+}
+
+model LawyerBaleActivationCode {
+  id          Int       @id @default(autoincrement())
+  lawyerId    Int
+  codeHash    String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  lawyer      TeamMember @relation(fields: [lawyerId], references: [id], onDelete: Cascade)
+
+  @@index([lawyerId, expiresAt])
+}
+
+model ConsultationEvent {
+  id                    Int       @id @default(autoincrement())
+  consultationRequestId Int
+  eventType             String
+  actorType             String
+  actorId               String?
+  metadata              String    @default("{}")
+  createdAt             DateTime  @default(now())
+
+  consultationRequest   ConsultationRequest @relation(fields: [consultationRequestId], references: [id], onDelete: Cascade)
+
+  @@index([consultationRequestId, createdAt])
+  @@index([eventType, createdAt])
+}
+
+model BaleProcessedUpdate {
+  updateId      String    @id
+  status        String    @default("RECEIVED")
+  attemptCount  Int       @default(1)
+  lastError     String?
+  receivedAt    DateTime  @default(now())
+  processedAt   DateTime?
+}
+
+model NotificationDelivery {
+  id                    Int       @id @default(autoincrement())
+  consultationRequestId Int?
+  recipientType         String
+  recipientId           String
+  messageType           String
+  dedupeKey             String    @unique
+  status                String    @default("PENDING")
+  attemptCount          Int       @default(0)
+  lastError             String?
+  sentAt                DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  consultationRequest   ConsultationRequest? @relation(fields: [consultationRequestId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([consultationRequestId, messageType])
 }
