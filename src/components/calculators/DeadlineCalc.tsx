@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Calculator, AlertCircle, Info, ChevronLeft, ChevronRight, Calendar, X, Plus } from "lucide-react";
 import { PrintableResult } from "./PrintableResult";
+import { CalcConsultationBridge } from "./CalcConsultationBridge";
+import { trackEvent } from "@/lib/analytics";
 
 type DeadlineItem = {
   id: number;
@@ -345,6 +347,7 @@ export function DeadlineCalc({ isRTL }: { isRTL: boolean }) {
 
     if (!res.ok) { setError(data.error || "خطا در محاسبه"); return; }
     setResult(data);
+    trackEvent("calculator_used", { calc: "deadline" });
   }
 
   function addCustomHoliday() {
@@ -593,6 +596,15 @@ export function DeadlineCalc({ isRTL }: { isRTL: boolean }) {
               </div>
             )}
           </div>
+          <CalcConsultationBridge
+            calcTitle={isRTL ? "پیگیری مواعد قانونی" : "Legal Deadline Follow-up"}
+            prefilledMessage={
+              isRTL
+                ? "سلام، از ماشین‌حساب مواعد قانونی سایت استفاده کردم و نیاز به مشاوره درباره‌ی مهلت‌های پرونده‌ام دارم."
+                : "Hi, I used the legal deadline calculator on your site and need consultation about my case deadlines."
+            }
+            isRTL={isRTL}
+          />
         </PrintableResult>
       )}
 

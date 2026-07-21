@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Calculator, AlertCircle } from "lucide-react";
 import { PrintableResult } from "./PrintableResult";
+import { CalcConsultationBridge } from "./CalcConsultationBridge";
+import { trackEvent } from "@/lib/analytics";
 
 const MONTH_NAMES_FA = [
   "", "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -78,6 +80,7 @@ export function DelayDamageCalc({ isRTL }: { isRTL: boolean }) {
       return;
     }
     setResult(data);
+    trackEvent("calculator_used", { calc: "delay-damage" });
   }
 
   function fmt(n: number): string {
@@ -235,6 +238,15 @@ export function DelayDamageCalc({ isRTL }: { isRTL: boolean }) {
               {isRTL ? "منبع: بانک مرکزی جمهوری اسلامی ایران — سال پایه ۱۳۹۵ = ۱۰۰" : "Source: Central Bank of Iran — Base year 1395 = 100"}
             </p>
           </div>
+          <CalcConsultationBridge
+            calcTitle={isRTL ? "مطالبه‌ی خسارت تأخیر تأدیه" : "Delay Damage Claim"}
+            prefilledMessage={
+              isRTL
+                ? `سلام، از ماشین‌حساب خسارت تأخیر تأدیه‌ی سایت استفاده کردم. مبلغ خسارت محاسبه‌شده: ${fmt(result.damageAmount)}. برای مشاوره تماس می‌گیرم.`
+                : `Hi, I used the delay damage calculator on your site. Calculated damages: ${fmt(result.damageAmount)}. Reaching out for consultation.`
+            }
+            isRTL={isRTL}
+          />
         </PrintableResult>
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white p-8 text-center text-gray-400 flex flex-col items-center justify-center">

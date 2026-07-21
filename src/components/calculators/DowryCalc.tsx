@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Calculator, AlertCircle } from "lucide-react";
 import { PrintableResult } from "./PrintableResult";
+import { CalcConsultationBridge } from "./CalcConsultationBridge";
+import { trackEvent } from "@/lib/analytics";
 
 const MONTH_NAMES_FA = [
   "", "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
@@ -78,6 +80,7 @@ export function DowryCalc({ isRTL }: { isRTL: boolean }) {
       return;
     }
     setResult(data);
+    trackEvent("calculator_used", { calc: "dowry" });
   }
 
   function fmt(n: number): string {
@@ -239,6 +242,15 @@ export function DowryCalc({ isRTL }: { isRTL: boolean }) {
               {isRTL ? "منبع: بانک مرکزی جمهوری اسلامی ایران — سال پایه ۱۳۹۵ = ۱۰۰" : "Source: Central Bank of Iran — Base year 1395 = 100"}
             </p>
           </div>
+          <CalcConsultationBridge
+            calcTitle={isRTL ? "مطالبه‌ی مهریه" : "Dowry Claim"}
+            prefilledMessage={
+              isRTL
+                ? `سلام، از ماشین‌حساب مهریه‌ی سایت استفاده کردم. ارزش فعلی محاسبه‌شده: ${fmt(result.currentValue)}. برای مشاوره تماس می‌گیرم.`
+                : `Hi, I used the dowry calculator on your site. Calculated current value: ${fmt(result.currentValue)}. Reaching out for consultation.`
+            }
+            isRTL={isRTL}
+          />
         </PrintableResult>
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white p-8 text-center text-gray-400 flex flex-col items-center justify-center">

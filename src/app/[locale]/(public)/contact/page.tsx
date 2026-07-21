@@ -7,6 +7,7 @@ import { MapPin, Phone, Clock, CheckCircle2, ExternalLink } from "lucide-react";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { offices } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
+import { trackEvent } from "@/lib/analytics";
 
 export default function ContactPage() {
   const t = useTranslations("contact");
@@ -37,6 +38,7 @@ export default function ContactPage() {
       });
       if (!res.ok) throw new Error();
       setSubmitted(true);
+      trackEvent("contact_submit", { locale });
     } catch {
       alert(isRTL ? "خطا در ارسال پیام. لطفاً دوباره تلاش کنید." : "Failed to send. Please try again.");
     } finally {

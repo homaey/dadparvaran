@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Calculator, AlertCircle } from "lucide-react";
 import { PrintableResult } from "./PrintableResult";
+import { CalcConsultationBridge } from "./CalcConsultationBridge";
+import { trackEvent } from "@/lib/analytics";
 
 type Result = {
   fullDiyeAmount: string;
@@ -68,6 +70,7 @@ export function DiyeCalc({ isRTL }: { isRTL: boolean }) {
       return;
     }
     setResult(data);
+    trackEvent("calculator_used", { calc: "diye" });
   }
 
   return (
@@ -200,6 +203,15 @@ export function DiyeCalc({ isRTL }: { isRTL: boolean }) {
                 : "Official diye rate is announced in Rials by the judiciary. Toman equivalent shown for convenience."}
             </p>
           </div>
+          <CalcConsultationBridge
+            calcTitle={isRTL ? "مطالبه‌ی دیه" : "Diye Claim"}
+            prefilledMessage={
+              isRTL
+                ? `سلام، از ماشین‌حساب دیه‌ی سایت استفاده کردم. مبلغ محاسبه‌شده: ${fmtToman(result.calculatedAmount)}. برای مشاوره تماس می‌گیرم.`
+                : `Hi, I used the diye calculator on your site. Calculated amount: ${fmtToman(result.calculatedAmount)}. Reaching out for consultation.`
+            }
+            isRTL={isRTL}
+          />
         </PrintableResult>
       ) : (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white p-8 text-center text-gray-400 flex flex-col items-center justify-center">
