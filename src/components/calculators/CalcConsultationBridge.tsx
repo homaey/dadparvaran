@@ -5,7 +5,7 @@ import { Phone, ArrowLeft } from "lucide-react";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
-import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
+import { consultationHref, consultationLinkProps } from "@/lib/consultation-cta";
 
 /**
  * پل «بعد از محاسبه → مشاوره». فاز D سند v2 پیشنهاد کرده که زیر نتیجه‌ی هر
@@ -75,7 +75,7 @@ export function CalcConsultationBridge({
           {...consultationLinkProps()}
           className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded-xl font-semibold transition-all backdrop-blur-sm"
         >
-          {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Bale") : (isRTL ? "ارسال پیام" : "Send a Message")}
+          {isRTL ? "درخواست مشاوره" : "Request Consultation"}
         </a>
       </div>
     </div>

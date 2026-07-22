@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { hasCompleteEnglish } from "@/lib/i18n-pages";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
-import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
+import { consultationHref, consultationLinkProps } from "@/lib/consultation-cta";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -166,13 +166,14 @@ export default function Navbar() {
                 {locale === "fa" ? "EN" : "FA"}
               </span>
             )}
-            {/* CTA — routes to Bale bot when configured, contact page otherwise */}
+            {/* CTA — routes to /fa/consultation, which offers both the Bale
+                mini-app and the web form (see src/lib/consultation-cta.ts) */}
             <a
               href={consultationHref(locale)}
               {...consultationLinkProps()}
               className="bg-gold-500 hover:bg-gold-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md"
             >
-              {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Consult via Bale") : t("consultation")}
+              {t("consultation")}
             </a>
           </div>
 
@@ -255,7 +256,7 @@ export default function Navbar() {
                 onClick={() => setMobileOpen(false)}
                 className="bg-gold-500 text-white px-5 py-2 rounded-lg text-sm font-semibold"
               >
-                {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Bale") : t("consultation")}
+                {t("consultation")}
               </a>
             </div>
           </div>

@@ -32,6 +32,7 @@ export async function publishConsultationToLawyersGroup(requestId: number): Prom
             caseStage: request.caseStage,
             urgency: request.urgency,
             createdAt: request.createdAt,
+            source: request.source,
           }),
           replyMarkup: claimKeyboard(request.claimToken),
         }),

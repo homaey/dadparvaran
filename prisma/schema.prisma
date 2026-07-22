@@ -528,10 +528,15 @@ model ConsultationRequest {
   claimToken         String    @unique
   source             String    @default("BALE_MINIAPP")
   status             String    @default("OPEN")
-  userBaleId         String
+  // null هنگامی که درخواست از فرم سایت آمده باشد و متقاضی حساب بله ندارد.
+  // در آن حالت واگذاری فقط تلفنی است و پیام «چت با وکیل» ارسال نمی‌شود.
+  userBaleId         String?
   userBaleUsername   String?
   clientName         String
+  // برای source=WEB_FORM اجباری است (تنها راه تماس)، برای مینی‌اپ اختیاری.
   phone              String?
+  email              String?
+  preferredContact   String?
   category           String
   subCategory        String?
   city               String
@@ -556,6 +561,8 @@ model ConsultationRequest {
   @@index([status, createdAt])
   @@index([assignedLawyerId, status])
   @@index([userBaleId, createdAt])
+  // نرخ‌گیری فرم سایت بر اساس شماره تماس — کاربر وب شناسه بله ندارد.
+  @@index([phone, createdAt])
 }
 
 model LawyerBaleAccount {

@@ -166,6 +166,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // حوزه‌ی جست‌وجوی تازه‌کاران به سایت است.
   const trustEntries: MetadataRoute.Sitemap = [
     {
+      // مقصد همه‌ی دکمه‌های «مشاوره رایگان» سایت — بالاترین اولویت تبدیل.
+      url: `${BASE_URL}/fa/consultation`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.95,
+    },
+    {
       url: `${BASE_URL}/fa/fees`,
       lastModified: new Date(),
       changeFrequency: "monthly",

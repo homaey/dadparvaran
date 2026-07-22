@@ -4,7 +4,7 @@ import { Phone, Award, ArrowLeft, ArrowRight, Scale, MessageSquare } from "lucid
 import { db } from "@/lib/db";
 import { toWhatsAppLink } from "@/lib/whatsapp";
 import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
-import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
+import { consultationHref, consultationLinkProps } from "@/lib/consultation-cta";
 
 type Lawyer = {
   id: number;
@@ -123,7 +123,7 @@ export default async function ContactLawyersCTA({
           className="mt-4 w-full flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition-colors"
         >
           <MessageSquare className="w-3.5 h-3.5" />
-          {isBaleConsultation() ? (isRTL ? "درخواست در بله" : "Bale") : (isRTL ? "ارسال پیام" : "Send Message")}
+          {isRTL ? "درخواست مشاوره" : "Request Consultation"}
         </a>
       </div>
     );
@@ -229,7 +229,7 @@ export default async function ContactLawyersCTA({
             className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-white px-8 py-3.5 rounded-xl font-semibold transition-colors cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />
-            {isBaleConsultation() ? (isRTL ? "درخواست مشاوره در بله" : "Consult via Bale") : (isRTL ? "ارسال پیام مشاوره" : "Send Consultation Message")}
+            {isRTL ? "درخواست مشاوره رایگان" : "Request a Free Consultation"}
           </a>
           <Link
             href={`/${locale}/lawyers`}

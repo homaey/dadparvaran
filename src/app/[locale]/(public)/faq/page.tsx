@@ -7,7 +7,7 @@ import WhatsAppIcon from "@/components/icons/WhatsAppIcon";
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
-import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
+import { consultationHref, consultationLinkProps } from "@/lib/consultation-cta";
 
 export const metadata: Metadata = {
   title: "پرسش‌های متداول — راهنمای کامل حقوقی | دادپروران مهر ایران",
@@ -195,7 +195,7 @@ export default function FaqPage() {
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+              مشاوره رایگان
             </a>
             {waHref && (
               <a
@@ -281,7 +281,7 @@ export default function FaqPage() {
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+              مشاوره رایگان
             </a>
             {waHref && (
               <a

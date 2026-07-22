@@ -17,7 +17,7 @@ import {
 import { toWhatsAppLink } from "@/lib/whatsapp";
 import { servicesData } from "@/lib/services-data";
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
-import { consultationHref, consultationLinkProps, isBaleConsultation } from "@/lib/consultation-cta";
+import { consultationHref, consultationLinkProps } from "@/lib/consultation-cta";
 
 // نگاشت hardcoded شهر → slug خدمات پرتقاضا. جای اینکه از داده‌ی صفحات
 // خدمات mine کنیم، شش خدمت اصلی را برای هر شهر یکسان می‌گذاریم — چون در
@@ -190,7 +190,7 @@ export default async function OfficeCityPage({
               className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25"
             >
               <Phone className="w-5 h-5" />
-              {isBaleConsultation() ? "درخواست مشاوره در بله" : "مشاوره رایگان"}
+              مشاوره رایگان
             </a>
             {waHref && (
               <a

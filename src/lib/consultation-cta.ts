@@ -1,19 +1,25 @@
 /**
- * Central source of truth for the "Request a consultation" CTA on the site.
+ * منبع واحد مقصد دکمه‌های «درخواست مشاوره» در سراسر سایت.
  *
- * User decision (2026-07-21):
- *   Every "request a consultation" or "review my case" button, wherever it
- *   sits on the site, must route to the Bale group intake — NOT to the
- *   legacy /fa/contact form. Direct phone and WhatsApp buttons (talking to
- *   an office / a specific lawyer) stay unchanged and live alongside this.
+ * تصمیم کاربر (۱۴۰۵/۰۴/۳۱ — 2026-07-22):
+ *   هر دکمه‌ی «مشاوره رایگان» یا «بررسی پرونده»، هر جای سایت که باشد، باید
+ *   محتوای فرم را به‌عنوان درخواست مشاوره به گروه وکلا در بله برساند — اما
+ *   دو نوع کاربر داریم و هر دو باید بتوانند درخواست بدهند:
  *
- * The bot URL is read from NEXT_PUBLIC_BALE_BOT_URL so it inlines into
- * client bundles. If the env var is unset (e.g. running locally before the
- * bot is provisioned), the helper falls back to the legacy contact form —
- * so the site is never left with dead CTAs.
+ *     • کاربری که بله دارد → مینی‌اپ بازو، و پس از پذیرش، لینک گفت‌وگوی
+ *       مستقیم با وکیلِ پذیرنده برایش ارسال می‌شود.
+ *     • کاربری که بله ندارد → فرم حرفه‌ای سایت؛ وکیلِ پذیرنده مشخصات و
+ *       شماره را می‌گیرد و تلفنی تماس می‌گیرد.
  *
- * Because NEXT_PUBLIC_* is read at build time, the app must be rebuilt on
- * production after the env value changes for the client-side value to update.
+ *   بنابراین دکمه‌ها دیگر مستقیم به بازوی بله نمی‌روند (که کاربر بدون بله را
+ *   به بن‌بست می‌رساند)، بلکه به /fa/consultation می‌روند که هر دو مسیر را
+ *   کنار هم ارائه می‌کند. دکمه‌های تلفن و واتساپ بدون تغییر باقی می‌مانند.
+ *
+ * BALE_BOT_URL همچنان صادر می‌شود تا صفحه‌ی /fa/consultation کارت «حساب بله
+ * دارید؟» را فقط وقتی رندر کند که بازو واقعاً تنظیم شده باشد.
+ *
+ * چون NEXT_PUBLIC_* در زمان بیلد جای‌گذاری می‌شود، پس از تغییر مقدار روی
+ * پروداکشن باید اپ دوباره بیلد شود تا مقدار سمت کلاینت به‌روز گردد.
  */
 
 const RAW_BALE_URL = process.env.NEXT_PUBLIC_BALE_BOT_URL?.trim();
@@ -22,26 +28,27 @@ export const BALE_BOT_URL: string | null =
   RAW_BALE_URL && RAW_BALE_URL.length > 0 ? RAW_BALE_URL : null;
 
 /**
- * href for the primary "request consultation" button.
- * Bale bot when configured, otherwise the site's contact page in the same locale.
+ * href دکمه‌ی اصلی «درخواست مشاوره».
+ *
+ * همیشه صفحه‌ی داخلی است: مسیر بله را خودِ آن صفحه پیشنهاد می‌دهد، و کاربر
+ * بدون بله هم فرم را همان‌جا دارد. EN فعلاً ترجمه ندارد و middleware آن را
+ * به FA ریدایرکت می‌کند.
  */
-export function consultationHref(locale: string): string {
-  if (BALE_BOT_URL) return BALE_BOT_URL;
-  return `/${locale === "en" ? "en" : "fa"}/contact`;
+export function consultationHref(_locale: string): string {
+  return "/fa/consultation";
 }
 
 /**
- * Extra `<a>` attributes: only set target/rel when the destination is Bale,
- * so an internal contact-page fallback doesn't open in a new tab.
+ * ویژگی‌های اضافی `<a>`. مقصد داخلی است، پس تب جدید باز نمی‌شود.
+ * امضا حفظ شده تا فراخوان‌های موجود در سراسر سایت دست‌نخورده بمانند.
  */
 export function consultationLinkProps(): { target?: string; rel?: string } {
-  if (!BALE_BOT_URL) return {};
-  return { target: "_blank", rel: "noopener noreferrer" };
+  return {};
 }
 
 /**
- * Whether the site is currently routing consultations through Bale.
- * Callers may switch label / icon based on this.
+ * آیا بازوی بله تنظیم شده است؟ صفحه‌ی مشاوره با این تصمیم می‌گیرد که کارت
+ * «ثبت درخواست در بله» را نشان بدهد یا نه.
  */
 export function isBaleConsultation(): boolean {
   return BALE_BOT_URL !== null;

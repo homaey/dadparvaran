@@ -77,41 +77,57 @@ export async function completeConsultationHandoff(input: {
             publicCode: request.publicCode,
             clientName: request.clientName,
             phone: request.phone,
+            email: request.email,
+            preferredContact: request.preferredContact,
             category: request.category,
             city: request.city,
             caseStage: request.caseStage,
             urgency: request.urgency,
             summary: request.summary,
+            source: request.source,
           }),
           replyMarkup: lawyerStatusKeyboard(request.claimToken),
         }),
     }),
   });
 
-  operations.push({
-    kind: "client",
-    promise: deliverWithPersistence({
-      consultationRequestId: request.id,
-      recipientType: "CLIENT",
-      recipientId: request.userBaleId,
-      messageType: "CLIENT_HANDOFF",
-      dedupeKey: `consultation:${request.id}:client-handoff:${request.assignedLawyerId}`,
-      maxAttempts,
-      operation: () =>
-        client.sendMessage({
-          chatId: request.userBaleId,
-          text: userAssignedMessage({ publicCode: request.publicCode, lawyerName: lawyer.nameFA }),
-          replyMarkup: userHandoffKeyboard({
-            publicCode: request.publicCode,
-            lawyerChatUrl: account.balePublicChatUrl,
+  // متقاضیِ فرم سایت شناسه بله ندارد، پس اعلانی برای او ارسال نمی‌شود و
+  // واگذاری با رسیدنِ پیام خصوصی به وکیل کامل محسوب می‌شود.
+  const clientReachableInBale = Boolean(request.userBaleId);
+  const clientBaleId = request.userBaleId;
+
+  if (clientReachableInBale && clientBaleId) {
+    operations.push({
+      kind: "client",
+      promise: deliverWithPersistence({
+        consultationRequestId: request.id,
+        recipientType: "CLIENT",
+        recipientId: clientBaleId,
+        messageType: "CLIENT_HANDOFF",
+        dedupeKey: `consultation:${request.id}:client-handoff:${request.assignedLawyerId}`,
+        maxAttempts,
+        operation: () =>
+          client.sendMessage({
+            chatId: clientBaleId,
+            text: userAssignedMessage({
+              publicCode: request.publicCode,
+              lawyerName: lawyer.nameFA,
+              hasChatUrl: Boolean(account.balePublicChatUrl?.trim()),
+            }),
+            replyMarkup: userHandoffKeyboard({
+              publicCode: request.publicCode,
+              lawyerChatUrl: account.balePublicChatUrl,
+            }),
           }),
-        }),
-    }),
-  });
+      }),
+    });
+  }
 
   const settled = await Promise.allSettled(operations.map((item) => item.promise));
   const results = operations.map((item, index) => ({ kind: item.kind, status: settled[index].status }));
-  const clientHandoffSucceeded = results.some((item) => item.kind === "client" && item.status === "fulfilled");
+  const clientHandoffSucceeded = clientReachableInBale
+    ? results.some((item) => item.kind === "client" && item.status === "fulfilled")
+    : results.some((item) => item.kind === "lawyer" && item.status === "fulfilled");
 
   if (clientHandoffSucceeded) {
     await db.consultationRequest.updateMany({
