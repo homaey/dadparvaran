@@ -2,31 +2,11 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { Vazirmatn } from "next/font/google";
-import { Inter, Playfair_Display } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import SessionProvider from "@/components/SessionProvider";
 import Analytics from "@/components/Analytics";
 import { getLegalServiceSchema, getLocalBusinessSchema } from "@/lib/schema";
 import "../globals.css";
-
-const vazirmatn = Vazirmatn({
-  subsets: ["arabic"],
-  variable: "--font-vazirmatn",
-  display: "swap",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  variable: "--font-playfair",
-  display: "swap",
-});
 
 export async function generateMetadata({
   params,
@@ -111,10 +91,16 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={locale === "fa" ? "rtl" : "ltr"}
-      className={`${vazirmatn.variable} ${inter.variable} ${playfair.variable}`}
       suppressHydrationWarning
     >
       <head>
+        <link
+          rel="preload"
+          href="/fonts/vazirmatn-arabic-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
