@@ -75,7 +75,7 @@ mv .deploy_tmp/.next .next
 mkdir -p public/fonts
 cp -f .deploy_tmp/public/fonts/* public/fonts/ 2>/dev/null || true
 rm -rf .deploy_tmp deploy.tgz
-echo "NEW BUILD_ID=`cat .next/BUILD_ID`"
+echo "NEW BUILD_ID=`$(cat .next/BUILD_ID)"
 "@
 ssh -i $KeyPath -o ConnectTimeout=20 "${User}@${RemoteHost}" $remote
 if ($LASTEXITCODE -ne 0) { Fail "remote extract/swap failed (live .next left untouched or restore .next.bak)" }
@@ -87,10 +87,10 @@ set -e
 cd $RemotePath
 pm2 restart $PmName --update-env
 sleep 7
-code=`curl -s -o /dev/null -w '%{http_code}' http://localhost:$Port/fa || echo 000`
+code=`$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$Port/fa || echo 000)
 echo "HEALTH=`$code"
 if [ "`$code" != "200" ]; then
-  echo 'HEALTH CHECK FAILED — rolling back to .next.bak'
+  echo 'HEALTH CHECK FAILED - rolling back to .next.bak'
   if [ -d .next.bak ]; then rm -rf .next && mv .next.bak .next && pm2 restart $PmName --update-env; fi
   exit 1
 fi
@@ -100,4 +100,4 @@ ssh -i $KeyPath -o ConnectTimeout=20 "${User}@${RemoteHost}" $restart
 if ($LASTEXITCODE -ne 0) { Fail "health check failed (rolled back to previous build)" }
 
 if (Test-Path "deploy.tgz") { Remove-Item "deploy.tgz" -Force }
-Write-Host "DEPLOY OK — https://www.dadparvaran.com/fa is serving the new build." -ForegroundColor Green
+Write-Host "DEPLOY OK - https://www.dadparvaran.com/fa is serving the new build." -ForegroundColor Green
