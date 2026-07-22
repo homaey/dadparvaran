@@ -18,7 +18,9 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "seo.home" });
   return {
-    title: t("title"),
+    // عنوان خانه از قبل شامل نام برند است؛ absolute مانع افزوده‌شدن دوبارهٔ
+    // «| دادپروران مهر ایران» توسط template در layout می‌شود.
+    title: { absolute: t("title") },
     description: t("description"),
     openGraph: {
       title: t("title"),

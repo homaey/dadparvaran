@@ -24,7 +24,8 @@ export async function generateMetadata({
   if (!service) return {};
   const isFA = locale === "fa";
   return {
-    title: isFA ? service.metaTitleFA : service.metaTitleEN,
+    // metaTitle از قبل شامل برند است؛ absolute مانع تکرار آن توسط template می‌شود.
+    title: { absolute: isFA ? service.metaTitleFA : service.metaTitleEN },
     description: isFA ? service.metaDescFA : service.metaDescEN,
     keywords: isFA ? service.keywordsFA : service.keywordsEN,
     alternates: {

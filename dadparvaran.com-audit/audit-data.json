@@ -1,0 +1,120 @@
+{
+  "summary": {
+    "health_score": 65,
+    "previous_score": 54,
+    "audit_date": "2026-07-22",
+    "business_type": "Local Legal Service (multi-branch: Tehran, Ahvaz, Andimeshk)",
+    "top_findings": [
+      "8,924 thin single-article law pages (97.7% of sitemap) are indexable and burn crawl budget",
+      "Duplicate content between single-article pages and parent law pages",
+      "robots.txt blocks /_next/ which prevents Googlebot from fetching CSS/JS",
+      "Images still use raw <img> (no next/image), no WebP/srcset/lazy on most",
+      "English homepage /en missing from sitemap; public HTML has Cache-Control: no-store"
+    ],
+    "quick_wins": [
+      "Remove /_next/ from robots.txt disallow",
+      "Remove/limit single-article law pages from sitemap",
+      "Fix double brand suffix in home & service titles",
+      "Add /en homepage to sitemap",
+      "Add BreadcrumbList JSON-LD to law pages"
+    ],
+    "verified_fixes": [
+      "8,135 duplicate law-article titles fixed (unique title with law name)",
+      "H1 on article pages now includes law name",
+      "Meta descriptions now unique per article",
+      "Homepage weight reduced 4.6MB -> 1.18MB; LCP ~19.5s -> ~2.1s",
+      "Fonts self-hosted (no fonts.googleapis.com dependency)",
+      "Flat-structure laws now display their articles",
+      "Prev/next + related experts/rulings internal links added"
+    ]
+  },
+  "categories": [
+    {
+      "name": "Technical SEO",
+      "score": 76,
+      "what_works": ["Valid robots + sitemap declaration", "Self-referencing canonical", "Correct lang/dir", "Full security headers", "TTFB ~180ms"],
+      "findings": [
+        {"title": "robots.txt blocks /_next/", "severity": "High", "description": "Disallow: /_next/ prevents crawlers fetching hashed CSS/JS under /_next/static, risking unstyled rendering for Googlebot/AI.", "recommendation": "Remove \"/_next/\" from disallow in src/app/robots.ts."},
+        {"title": "Crawl budget on thin pages", "severity": "High", "description": "8,924 of 9,134 sitemap URLs (97.7%) are single-article law pages.", "recommendation": "Drop lawArticleEntries from src/app/sitemap.ts; keep parent law pages."},
+        {"title": "/en homepage missing from sitemap", "severity": "Medium", "description": "hasCompleteEnglish(\"\") returns false though /en is live and indexable.", "recommendation": "Mark home as complete-English or add /en home explicitly."},
+        {"title": "No caching on public HTML", "severity": "Medium", "description": "Cache-Control: private, no-cache, no-store on every public page; each hit reaches the low-RAM Next.js server.", "recommendation": "Add s-maxage + stale-while-revalidate for public routes."},
+        {"title": "Single monolithic sitemap", "severity": "Medium", "description": "9,134 URLs in one file, no sitemap index.", "recommendation": "Split into sitemap index + fa/en."},
+        {"title": "Duplicate HSTS header", "severity": "Low", "description": "HSTS set in both next.config.mjs and nginx.", "recommendation": "Keep one source."},
+        {"title": "X-Powered-By exposed", "severity": "Low", "description": "Next.js version leaked.", "recommendation": "Set poweredByHeader: false."}
+      ]
+    },
+    {
+      "name": "On-Page SEO",
+      "score": 72,
+      "what_works": ["Unique article titles with law name (title.absolute)", "H1 includes law name", "Unique word-boundary meta descriptions", "Prev/next article navigation"],
+      "findings": [
+        {"title": "Brand name duplicated in <title>", "severity": "Medium", "description": "Layout template appends brand to titles that already contain it (home, services: '... | دادپروران مهر ایران | دادپروران مهر ایران').", "recommendation": "Author page titles without brand suffix; let template add it once."},
+        {"title": "Titles over 60 chars", "severity": "Medium", "description": "Service 76, EN home 96 chars, partly from double brand.", "recommendation": "Shorten after fixing double brand."},
+        {"title": "Duplicate content article vs law page", "severity": "High", "description": "Parent law page contains full text of all articles; single pages are subsets.", "recommendation": "noindex,follow single pages OR enrich with commentary."},
+        {"title": "Excessive outgoing links on law pages", "severity": "Medium", "description": "Constitution page ~207 links; larger laws far more, diluting link equity.", "recommendation": "Paginate/collapse articles by chapter."}
+      ]
+    },
+    {
+      "name": "Content Quality",
+      "score": 48,
+      "what_works": ["Service & article pages have good depth (400+ words)", "Unique per-article descriptions"],
+      "findings": [
+        {"title": "Thin content at scale", "severity": "Critical", "description": "~8,900 single-article pages median ~190 words, indexable, no commentary.", "recommendation": "noindex or enrich."},
+        {"title": "Few published articles", "severity": "High", "description": "Only ~11 articles; weak topical authority.", "recommendation": "Build hub-and-spoke content clusters per service."},
+        {"title": "Thin lawyer pages (E-E-A-T)", "severity": "Medium", "description": "~280 words; insufficient for YMYL legal niche.", "recommendation": "Add credentials, notable cases, bar license, education."}
+      ]
+    },
+    {
+      "name": "Schema",
+      "score": 62,
+      "what_works": ["Valid JSON-LD, no parse errors", "FAQPage/Service/BreadcrumbList on home & services", "Person/Breadcrumb on lawyers"],
+      "findings": [
+        {"title": "Law/article pages lack dedicated schema", "severity": "High", "description": "~9,000 pages have only global LegalService blocks; no BreadcrumbList/Legislation.", "recommendation": "Add BreadcrumbList; consider Legislation type."},
+        {"title": "LegalService repeated 4x per page", "severity": "Medium", "description": "1 main + 3 branches as independent LegalService entities on every page, muddying entity consolidation and inflating HTML.", "recommendation": "One Organization with department/branch."},
+        {"title": "Calculators lack schema", "severity": "Low", "description": "No WebApplication/HowTo.", "recommendation": "Add WebApplication."}
+      ]
+    },
+    {
+      "name": "Performance (CWV)",
+      "score": 68,
+      "what_works": ["Homepage 4.6MB -> 1.18MB", "LCP ~19.5s -> ~2.1s", "Large lawyer photos now WebP", "CLS 0, TTFB good"],
+      "findings": [
+        {"title": "Raw JPGs remain", "severity": "Medium", "description": "c2a44717.jpg (144KB) and 092740d9.jpg (80KB) served raw at small display size.", "recommendation": "Convert to WebP / use next/image."},
+        {"title": "Heavy HTML (173KB)", "severity": "Medium", "description": "Inflated by duplicated LegalService JSON-LD + RSC payload.", "recommendation": "Reduce duplicated schema."},
+        {"title": "Large JS bundle (~500KB)", "severity": "Low", "description": "Main chunk 169KB + polyfills 110KB.", "recommendation": "Modern browserslist to shrink polyfills."},
+        {"title": "No edge/CDN caching", "severity": "Medium", "description": "no-store on public pages amplifies load on low-RAM server.", "recommendation": "Add caching."}
+      ]
+    },
+    {
+      "name": "AI Search Readiness",
+      "score": 70,
+      "what_works": ["/llms.txt present & structured", "Rich schema + FAQPage for citation", "No AI crawler blocking", "Full HTTPS"],
+      "findings": [
+        {"title": "Thin content limits citability", "severity": "High", "description": "190-word article pages lack self-contained context AI engines cite.", "recommendation": "Enrich key articles."},
+        {"title": "/_next/ block harms AI rendering", "severity": "High", "description": "Blocked assets affect AI crawlers too.", "recommendation": "Unblock /_next/."},
+        {"title": "No /llms-full.txt", "severity": "Low", "description": "Large legal corpus would benefit from a full version.", "recommendation": "Generate /llms-full.txt."}
+      ]
+    },
+    {
+      "name": "Images",
+      "score": 55,
+      "what_works": ["Near-100% alt coverage", "Two hero images converted to WebP"],
+      "findings": [
+        {"title": "next/image not used", "severity": "High", "description": "~19 files use raw <img>; no automatic WebP/AVIF, srcset, or lazy loading.", "recommendation": "Migrate to next/image progressively."},
+        {"title": "Uploads stored raw", "severity": "Medium", "description": "Panel uploads still save original files.", "recommendation": "Compress on upload."}
+      ]
+    }
+  ],
+  "action_plan": {
+    "phases": [
+      {"name": "Phase 1: Quick Wins", "timeframe": "Week 1", "items": ["Unblock /_next/ in robots.ts", "Remove single-article pages from sitemap", "Fix double brand in titles", "Add /en home to sitemap", "poweredByHeader:false + dedupe HSTS", "Convert 2 remaining JPGs to WebP"]},
+      {"name": "Phase 2: High-Impact", "timeframe": "Weeks 2-3", "items": ["noindex or enrich single-article pages", "Add BreadcrumbList JSON-LD to law pages", "Consolidate 4x LegalService into Organization+branches", "Add public Cache-Control", "Paginate large law pages"]},
+      {"name": "Phase 3: Content & Authority", "timeframe": "Month 2", "items": ["Build content clusters per service", "Enrich lawyer pages for E-E-A-T", "Add Legislation schema"]},
+      {"name": "Phase 4: Monitoring & Iteration", "timeframe": "Ongoing", "items": ["Migrate <img> to next/image", "Compress uploads on ingest", "Set up Search Console", "Split sitemap + add /llms-full.txt", "Check nginx/pm2 concurrency limits"]}
+    ]
+  },
+  "artifacts": {
+    "findings_dir": "findings/",
+    "screenshots_dir": "screenshots/"
+  }
+}

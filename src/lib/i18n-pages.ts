@@ -27,9 +27,13 @@ const COMPLETE_EN_PATTERNS: string[] = [
 ];
 
 export function hasCompleteEnglish(pathWithoutLocale: string): boolean {
-  const p = pathWithoutLocale.startsWith("/")
-    ? pathWithoutLocale
-    : `/${pathWithoutLocale}`;
+  // مسیر ریشه ("" یا "/") باید با الگوی "" تطبیق یابد؛ خانهٔ انگلیسی کامل است.
+  const p =
+    pathWithoutLocale === "" || pathWithoutLocale === "/"
+      ? ""
+      : pathWithoutLocale.startsWith("/")
+        ? pathWithoutLocale
+        : `/${pathWithoutLocale}`;
 
   return COMPLETE_EN_PATTERNS.some((pattern) => {
     if (pattern.endsWith("/*")) {

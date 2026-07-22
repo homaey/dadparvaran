@@ -49,9 +49,12 @@ if (-not $SkipBuild) {
 if (-not (Test-Path ".next/BUILD_ID")) { Fail ".next/BUILD_ID missing after build" }
 
 # 2) Pack the build output (exclude the huge, unneeded build cache).
-Write-Host "[2/5] packing .next + public/fonts..." -ForegroundColor Cyan
+#    next.config.mjs is shipped too: it holds security headers, CSP and runtime
+#    flags (e.g. poweredByHeader) that `next start` reads at boot — the server
+#    copy would otherwise drift from the repo.
+Write-Host "[2/5] packing .next + public/fonts + next.config.mjs..." -ForegroundColor Cyan
 if (Test-Path "deploy.tgz") { Remove-Item "deploy.tgz" -Force }
-tar --exclude=".next/cache" -czf deploy.tgz .next public/fonts
+tar --exclude=".next/cache" -czf deploy.tgz .next public/fonts next.config.mjs
 if ($LASTEXITCODE -ne 0 -or -not (Test-Path "deploy.tgz")) { Fail "tar failed" }
 
 # 3) Upload.
@@ -74,6 +77,7 @@ rm -rf .next.bak
 mv .deploy_tmp/.next .next
 mkdir -p public/fonts
 cp -f .deploy_tmp/public/fonts/* public/fonts/ 2>/dev/null || true
+cp -f .deploy_tmp/next.config.mjs next.config.mjs 2>/dev/null || true
 rm -rf .deploy_tmp deploy.tgz
 echo "NEW BUILD_ID=`$(cat .next/BUILD_ID)"
 "@

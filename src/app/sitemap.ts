@@ -91,32 +91,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   } catch {}
 
-  let lawArticleEntries: MetadataRoute.Sitemap = [];
-  try {
-    const lawNodes = await db.legalNode.findMany({
-      where: { type: "LAW" },
-      select: { id: true, slug: true },
-    });
-    const lawSlugById = new Map(lawNodes.map((l) => [l.id, l.slug]));
-
-    const articleNodes = await db.legalNode.findMany({
-      where: { type: "ARTICLE", lawId: { not: null } },
-      select: { slug: true, lawId: true, updatedAt: true },
-    });
-
-    lawArticleEntries = articleNodes.flatMap((a) => {
-      const lawSlug = a.lawId != null ? lawSlugById.get(a.lawId) : undefined;
-      if (!lawSlug) return [];
-      return [
-        {
-          url: `${BASE_URL}/fa/laws/${lawSlug}/${a.slug}`,
-          lastModified: a.updatedAt,
-          changeFrequency: "yearly" as const,
-          priority: 0.6,
-        },
-      ];
-    });
-  } catch {}
+  // صفحات تکی ماده عمداً از سایت‌مپ حذف شده‌اند: ~۸٬۹۰۰ صفحهٔ نازک بودند که
+  // ۹۷.۷٪ سایت‌مپ را می‌گرفتند و بودجهٔ کراول را هدر می‌دادند. این صفحات همچنان
+  // index,follow و از طریق صفحهٔ والد قانون و ناوبری قبلی/بعدی قابل‌دسترس‌اند؛
+  // فقط دیگر در سایت‌مپ تبلیغ نمی‌شوند تا گوگل روی صفحات باارزش‌تر تمرکز کند.
 
   let tagEntries: MetadataRoute.Sitemap = [];
   try {
@@ -219,7 +197,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...articleEntries,
     ...calcEntries,
     ...lawEntries,
-    ...lawArticleEntries,
     ...tagEntries,
     ...formEntries,
     ...teamEntries,
