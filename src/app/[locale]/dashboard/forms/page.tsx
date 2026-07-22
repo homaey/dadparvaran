@@ -160,6 +160,8 @@ export default function AdminFormsPage() {
   const [showNew, setShowNew] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [aiEditing, setAiEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
@@ -187,6 +189,7 @@ export default function AdminFormsPage() {
     });
     setEditingId(null);
     setShowNew(false);
+    setError(null);
   };
 
   const startEdit = (t: Template) => {
@@ -224,21 +227,38 @@ export default function AdminFormsPage() {
       ...(editingId ? { id: editingId } : {}),
     };
 
-    const res = await fetch("/api/admin/forms", {
-      method: editingId ? "PUT" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/forms", {
+        method: editingId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      resetForm();
-      fetchData();
+      if (res.ok) {
+        resetForm();
+        fetchData();
+        return;
+      }
+
+      const data = await res.json().catch(() => ({}));
+      setError(data?.error || (isRTL ? "ذخیره با خطا مواجه شد" : "Save failed"));
+    } catch {
+      setError(isRTL ? "خطای شبکه هنگام ذخیره" : "Network error while saving");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id: number) => {
     if (!confirm(isRTL ? "آیا از حذف اطمینان دارید؟" : "Are you sure?")) return;
-    await fetch(`/api/admin/forms?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/forms?id=${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data?.error || (isRTL ? "حذف با خطا مواجه شد" : "Delete failed"));
+      return;
+    }
     fetchData();
   };
 
@@ -268,11 +288,16 @@ export default function AdminFormsPage() {
   };
 
   const togglePublish = async (t: Template) => {
-    await fetch("/api/admin/forms", {
+    const res = await fetch("/api/admin/forms", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: t.id, isPublished: !t.isPublished }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data?.error || (isRTL ? "تغییر وضعیت با خطا مواجه شد" : "Update failed"));
+      return;
+    }
     fetchData();
   };
 
@@ -469,6 +494,15 @@ export default function AdminFormsPage() {
             </div>
           )}
 
+          {error && (
+            <div
+              role="alert"
+              className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700"
+            >
+              {error}
+            </div>
+          )}
+
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -482,17 +516,18 @@ export default function AdminFormsPage() {
             <div className="flex-1" />
             <button
               onClick={resetForm}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
+              disabled={saving}
+              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer disabled:opacity-50"
             >
               {isRTL ? "انصراف" : "Cancel"}
             </button>
             <button
               onClick={handleSave}
-              disabled={!form.slug || !form.titleFA}
+              disabled={!form.slug || !form.titleFA || saving}
               className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-white px-5 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 cursor-pointer"
             >
-              <Save className="w-4 h-4" />
-              {isRTL ? "ذخیره" : "Save"}
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+              {saving ? (isRTL ? "در حال ذخیره..." : "Saving...") : (isRTL ? "ذخیره" : "Save")}
             </button>
           </div>
         </div>
