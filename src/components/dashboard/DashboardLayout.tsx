@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { useLocale } from "next-intl";
 import {
   Scale, LayoutDashboard, FileText, Users,
-  Settings, LogOut, Menu, X, Bell, Mail,
+  Settings, LogOut, Menu, X, Bell, Mail, MessageSquare,
   BookOpen, ShieldCheck, Tag, Landmark, Calculator,
   TrendingUp, Clock, CalendarDays,
   Sparkles, ListChecks, BellRing, BarChart3, PenTool, Download,
@@ -59,6 +59,7 @@ export default function DashboardLayout({ children, role, userName }: Props) {
     ADMIN: [
       { href: base, icon: LayoutDashboard, label: isRTL ? "داشبورد" : "Dashboard" },
       { href: `${base}/messages`, icon: Mail, label: isRTL ? "پیام‌ها" : "Messages" },
+      { href: `${base}/consultations`, icon: MessageSquare, label: isRTL ? "درخواست‌های مشاوره" : "Consultations" },
       { href: `${base}/lawyers`, icon: ShieldCheck, label: isRTL ? "تأیید وکلا" : "Lawyer Approval" },
       { href: `${base}/articles`, icon: BookOpen, label: isRTL ? "مقالات" : "Articles" },
       ...contentItems,
