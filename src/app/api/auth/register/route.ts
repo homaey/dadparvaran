@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { clientIp, isRateLimited } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().min(2),
@@ -11,8 +12,20 @@ const schema = z.object({
   role: z.enum(["LAWYER"]),
 });
 
+// ثبت‌نام عمومی است (بخشی از جریان ثبت‌نام وکیل)، پس نرخ‌گیری IP-محور از ساخت
+// انبوه حساب جلوگیری می‌کند بی‌آنکه جریان قانونی را بشکند.
+const REGISTER_LIMIT = 5;
+const REGISTER_WINDOW_MS = 60 * 60 * 1000;
+
 export async function POST(req: NextRequest) {
   try {
+    if (isRateLimited("register", clientIp(req), REGISTER_LIMIT, REGISTER_WINDOW_MS)) {
+      return NextResponse.json(
+        { error: "تعداد تلاش‌های ثبت‌نام بیش از حد مجاز است. لطفاً بعداً تلاش کنید." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const data = schema.parse(body);
 

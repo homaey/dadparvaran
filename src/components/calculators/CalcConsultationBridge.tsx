@@ -72,7 +72,7 @@ export function CalcConsultationBridge({
         )}
         <a
           href={consultationHref(isRTL ? "fa" : "en")}
-          {...consultationLinkProps()}
+          {...consultationLinkProps("calculator-bridge")}
           className="flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 py-3 rounded-xl font-semibold transition-all backdrop-blur-sm"
         >
           {isRTL ? "درخواست مشاوره" : "Request Consultation"}

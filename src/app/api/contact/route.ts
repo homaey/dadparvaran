@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { notifyAdminViaBale } from "@/modules/notifications/bale-provider";
+import { clientIp, isRateLimited } from "@/lib/rate-limit";
 
 const schema = z.object({
   name: z.string().min(2).max(100),
@@ -12,33 +13,8 @@ const schema = z.object({
   website: z.string().max(200).optional(),
 });
 
-// محدودیت نرخ درون‌حافظه‌ای. pm2 در حالت fork تک‌نمونه اجرا می‌شود، پس این
-// شمارنده بین همه درخواست‌ها مشترک است. با ری‌استارت صفر می‌شود — که برای
-// جلوگیری از اسپم کافی است. اگر روزی به cluster mode رفتیم، به Redis نیاز است.
 const RATE_LIMIT = 5;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
-const hits = new Map<string, number[]>();
-
-function clientIp(req: NextRequest): string {
-  const fwd = req.headers.get("x-forwarded-for");
-  return fwd?.split(",")[0].trim() || req.headers.get("x-real-ip") || "unknown";
-}
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-  if (recent.length >= RATE_LIMIT) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  // پاک‌سازی تنبل تا Map بی‌نهایت رشد نکند
-  if (hits.size > 5000) {
-    for (const [k, v] of hits) if (v.every((t) => now - t >= RATE_WINDOW_MS)) hits.delete(k);
-  }
-  return false;
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,7 +26,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true }, { status: 201 });
     }
 
-    if (isRateLimited(clientIp(req))) {
+    if (isRateLimited("contact", clientIp(req), RATE_LIMIT, RATE_WINDOW_MS)) {
       return NextResponse.json(
         { error: "تعداد پیام‌های ارسالی بیش از حد مجاز است. لطفاً بعداً تلاش کنید." },
         { status: 429 }

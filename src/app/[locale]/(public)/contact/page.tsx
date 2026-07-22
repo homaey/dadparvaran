@@ -15,10 +15,12 @@ export default function ContactPage() {
   const isRTL = locale === "fa";
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     const form = e.target as HTMLFormElement;
     const body = {
@@ -40,7 +42,7 @@ export default function ContactPage() {
       setSubmitted(true);
       trackEvent("contact_submit", { locale });
     } catch {
-      alert(isRTL ? "خطا در ارسال پیام. لطفاً دوباره تلاش کنید." : "Failed to send. Please try again.");
+      setError(isRTL ? "خطا در ارسال پیام. لطفاً دوباره تلاش کنید." : "Failed to send. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -223,6 +225,11 @@ export default function ContactPage() {
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary-500 transition-colors bg-white resize-none"
                     />
                   </div>
+                  {error && (
+                    <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm leading-6 text-red-700">
+                      {error}
+                    </p>
+                  )}
                   <button
                     type="submit"
                     disabled={loading}

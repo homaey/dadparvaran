@@ -119,7 +119,7 @@ export default async function ContactLawyersCTA({
         </div>
         <a
           href={consultationHref(locale)}
-          {...consultationLinkProps()}
+          {...consultationLinkProps("lawyer-card")}
           className="mt-4 w-full flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-600 text-white text-xs px-4 py-2.5 rounded-xl font-semibold transition-colors"
         >
           <MessageSquare className="w-3.5 h-3.5" />
@@ -225,7 +225,7 @@ export default async function ContactLawyersCTA({
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a
             href={consultationHref(locale)}
-            {...consultationLinkProps()}
+            {...consultationLinkProps("section-footer")}
             className="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-600 text-white px-8 py-3.5 rounded-xl font-semibold transition-colors cursor-pointer"
           >
             <MessageSquare className="w-4 h-4" />

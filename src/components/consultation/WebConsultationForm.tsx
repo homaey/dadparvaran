@@ -294,6 +294,7 @@ export function WebConsultationForm({ officePhone, officePhoneDisplay }: {
                   key={option}
                   type="button"
                   onClick={() => set("preferredContact", option)}
+                  aria-pressed={form.preferredContact === option}
                   className={`cursor-pointer rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                     form.preferredContact === option
                       ? "border-primary-600 bg-primary-50 text-primary-800"
@@ -365,6 +366,7 @@ export function WebConsultationForm({ officePhone, officePhoneDisplay }: {
                   key={option}
                   type="button"
                   onClick={() => set("urgency", option)}
+                  aria-pressed={form.urgency === option}
                   className={`cursor-pointer rounded-xl border px-3 py-2.5 text-sm font-medium transition-colors ${
                     form.urgency === option
                       ? "border-gold-500 bg-gold-50 text-gold-700"

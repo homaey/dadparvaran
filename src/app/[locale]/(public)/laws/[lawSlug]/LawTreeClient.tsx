@@ -118,6 +118,11 @@ export default function LawTreeClient({ sections, articles, lawSlug, locale }: P
     return sections.filter(s => s.depth <= 2);
   }, [sections]);
 
+  // موادی که مستقیم زیر خود قانون‌اند (بدون SECTION والد) sectionId=0 دارند.
+  // قوانین «تخت» (بدون فصل‌بندی) فقط همین‌ها را دارند و اگر این‌جا رندر نشوند،
+  // با وجود حضور در دیتابیس هیچ ماده‌ای نمایش داده نمی‌شود.
+  const rootArticles = useMemo(() => articlesBySection.get(0) || [], [articlesBySection]);
+
   return (
     <div dir="rtl" className="font-fa">
       {/* Toolbar */}
@@ -251,6 +256,27 @@ export default function LawTreeClient({ sections, articles, lawSlug, locale }: P
       {/* Main content */}
       {!filteredArticles && (
         <div className="bg-white border-x border-b border-gray-200 rounded-b-2xl">
+          {/* موادِ مستقیم زیر قانون (قوانین بدون فصل‌بندی) — پیش از بخش‌ها */}
+          {rootArticles.map(article => (
+            <div
+              key={article.id}
+              id={`article-${article.articleNumber || article.id}`}
+              className="px-4 sm:px-8 py-5 border-b border-gray-100 transition-all"
+            >
+              <Link
+                href={`/${locale}/laws/${lawSlug}/${article.slug}`}
+                className="inline-block text-primary-600 hover:text-primary-800 font-semibold mb-2 text-sm"
+              >
+                {toPersianDigits(article.title)}
+              </Link>
+              {article.content && (
+                <p className="whitespace-pre-wrap text-gray-900 text-base leading-[2.15] text-justify">
+                  {toPersianDigits(article.content)}
+                </p>
+              )}
+            </div>
+          ))}
+
           {sections.map((section, idx) => {
             if (!isSectionVisible(idx)) return null;
 

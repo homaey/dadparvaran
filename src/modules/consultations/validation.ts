@@ -10,7 +10,7 @@ export const consultationInputSchema = z.object({
   clientRole: z.string().trim().max(100).optional().or(z.literal("")),
   caseStage: z.string().trim().min(2).max(100),
   urgency: z.enum(["عادی", "فوری", "بسیار فوری"]),
-  summary: z.string().trim().min(20).max(1000),
+  summary: z.string().trim().min(40).max(1000),
   acceptedTerms: z.literal(true),
   website: z.string().max(200).optional(),
 });

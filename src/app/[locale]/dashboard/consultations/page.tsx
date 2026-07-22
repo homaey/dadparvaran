@@ -6,12 +6,15 @@ import { ConsultationAdminActions } from "./ConsultationAdminActions";
 export const dynamic = "force-dynamic";
 
 export default async function ConsultationDashboardPage({
+  params,
   searchParams,
 }: {
+  params: { locale: string };
   searchParams?: { status?: string };
 }) {
+  const { locale } = params;
   const user = await requireUser(["ADMIN"]);
-  if (!user) redirect("/fa/auth/login");
+  if (!user) redirect(`/${locale}/auth/login`);
 
   const status = searchParams?.status?.trim();
   const [requests, lawyers, openCount, staleOpen] = await Promise.all([
@@ -35,7 +38,7 @@ export default async function ConsultationDashboardPage({
   ]);
 
   return (
-    <main className="space-y-6 p-4 md:p-8" dir="rtl">
+    <main className="space-y-6 p-4 md:p-8" dir={locale === "fa" ? "rtl" : "ltr"}>
       <header>
         <h1 className="text-2xl font-bold">درخواست‌های مشاوره</h1>
         <p className="mt-2 text-sm leading-7 text-slate-600">

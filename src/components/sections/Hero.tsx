@@ -64,7 +64,7 @@ export default async function Hero({ locale }: { locale: string }) {
             <div className="flex flex-wrap gap-4">
               <a
                 href={consultationHref(locale)}
-                {...consultationLinkProps()}
+                {...consultationLinkProps("hero")}
                 className="flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-white px-8 py-4 rounded-xl font-semibold transition-all shadow-xl shadow-gold-500/25 hover:shadow-gold-400/30 hover:-translate-y-0.5"
               >
                 {t("cta")}

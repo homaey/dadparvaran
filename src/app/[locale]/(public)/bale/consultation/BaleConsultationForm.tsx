@@ -1,6 +1,12 @@
 "use client";
 
 import { FormEvent, ReactNode, useEffect, useMemo, useState } from "react";
+import { CheckCircle2 } from "lucide-react";
+import {
+  CASE_STAGES,
+  CONSULTATION_CATEGORIES,
+  URGENCY_LEVELS,
+} from "@/modules/consultations/web-constants";
 
 declare global {
   interface Window {
@@ -45,18 +51,6 @@ const initialState: FormState = {
   acceptedTerms: false,
   website: "",
 };
-
-const categories = [
-  "ملکی و ثبتی",
-  "خانواده",
-  "کیفری",
-  "قرارداد و تجارت",
-  "چک و مطالبات",
-  "کار و تأمین اجتماعی",
-  "ارث و ترکه",
-  "دیوان عدالت اداری",
-  "سایر",
-];
 
 export function BaleConsultationForm() {
   const [step, setStep] = useState(1);
@@ -106,8 +100,8 @@ export function BaleConsultationForm() {
 
   async function submit(event: FormEvent) {
     event.preventDefault();
-    if (form.summary.trim().length < 20 || !form.acceptedTerms) {
-      setError("شرح کوتاه حداقل ۲۰ کاراکتر و تأیید شرایط الزامی است.");
+    if (form.summary.trim().length < 40 || !form.acceptedTerms) {
+      setError("شرح موضوع باید دست‌کم ۴۰ نویسه باشد و تأیید شرایط الزامی است.");
       return;
     }
 
@@ -139,7 +133,9 @@ export function BaleConsultationForm() {
   if (result) {
     return (
       <section className="rounded-2xl bg-white p-6 text-center shadow-sm ring-1 ring-black/5">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100 text-2xl">✓</div>
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+          <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+        </div>
         <h2 className="mt-4 text-xl font-bold text-slate-900">درخواست ثبت شد</h2>
         <p className="mt-3 text-sm leading-7 text-slate-600">کد پیگیری خود را نگه دارید:</p>
         <div className="mx-auto mt-2 rounded-xl bg-slate-100 px-4 py-3 font-mono text-lg font-bold" dir="ltr">
@@ -175,7 +171,7 @@ export function BaleConsultationForm() {
           <Field label="حوزه حقوقی">
             <select value={form.category} onChange={(e) => set("category", e.target.value)} className="input">
               <option value="">انتخاب کنید</option>
-              {categories.map((item) => <option key={item}>{item}</option>)}
+              {CONSULTATION_CATEGORIES.map((item) => <option key={item}>{item}</option>)}
             </select>
           </Field>
           <Field label="شهر مرتبط با پرونده">
@@ -192,16 +188,12 @@ export function BaleConsultationForm() {
           <Field label="مرحله فعلی پرونده">
             <select value={form.caseStage} onChange={(e) => set("caseStage", e.target.value)} className="input">
               <option value="">انتخاب کنید</option>
-              <option>پیش از طرح دعوا</option>
-              <option>پرونده در حال رسیدگی</option>
-              <option>حکم صادر شده</option>
-              <option>مرحله اجرا</option>
-              <option>اطلاع ندارم</option>
+              {CASE_STAGES.map((item) => <option key={item}>{item}</option>)}
             </select>
           </Field>
           <Field label="فوریت">
             <select value={form.urgency} onChange={(e) => set("urgency", e.target.value as FormState["urgency"])} className="input">
-              <option>عادی</option><option>فوری</option><option>بسیار فوری</option>
+              {URGENCY_LEVELS.map((item) => <option key={item}>{item}</option>)}
             </select>
           </Field>
         </div>

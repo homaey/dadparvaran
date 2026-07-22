@@ -40,10 +40,15 @@ export function consultationHref(_locale: string): string {
 
 /**
  * ویژگی‌های اضافی `<a>`. مقصد داخلی است، پس تب جدید باز نمی‌شود.
- * امضا حفظ شده تا فراخوان‌های موجود در سراسر سایت دست‌نخورده بمانند.
+ *
+ * `location` محل کلیک را مشخص می‌کند (navbar، hero، …) و به‌صورت data-cta روی
+ * لینک می‌نشیند تا TrackClicks رویداد consultation_cta_click را با همان محل
+ * ثبت کند. بدون location هم لینک ردیابی می‌شود (چون href شامل /consultation است).
  */
-export function consultationLinkProps(): { target?: string; rel?: string } {
-  return {};
+export function consultationLinkProps(
+  location?: string
+): { target?: string; rel?: string; "data-cta"?: string } {
+  return location ? { "data-cta": `consultation-${location}` } : {};
 }
 
 /**

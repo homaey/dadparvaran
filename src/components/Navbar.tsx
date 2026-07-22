@@ -170,7 +170,7 @@ export default function Navbar() {
                 mini-app and the web form (see src/lib/consultation-cta.ts) */}
             <a
               href={consultationHref(locale)}
-              {...consultationLinkProps()}
+              {...consultationLinkProps("navbar")}
               className="bg-gold-500 hover:bg-gold-600 text-white px-5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-md"
             >
               {t("consultation")}
@@ -184,7 +184,9 @@ export default function Navbar() {
               solid ? "text-gray-700" : "text-white"
             )}
             onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
+            aria-label={locale === "fa" ? "باز و بسته کردن منو" : "Toggle menu"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -193,7 +195,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 shadow-xl">
+        <div id="mobile-menu" className="lg:hidden bg-white border-t border-gray-100 shadow-xl">
           <div className="px-4 py-4 space-y-1">
             {/* تماس مستقیم در بالای منوی موبایل — کاربر بدون اسکرول به CTA اصلی می‌رسد. */}
             <div className="flex gap-2 pb-3 mb-2 border-b border-gray-100">
@@ -252,7 +254,7 @@ export default function Navbar() {
               )}
               <a
                 href={consultationHref(locale)}
-                {...consultationLinkProps()}
+                {...consultationLinkProps("navbar-mobile")}
                 onClick={() => setMobileOpen(false)}
                 className="bg-gold-500 text-white px-5 py-2 rounded-lg text-sm font-semibold"
               >

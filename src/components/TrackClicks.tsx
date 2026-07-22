@@ -14,6 +14,10 @@ import { trackEvent } from "@/lib/analytics";
  *
  * data-cta روی لینک اختیاری است — اگر تعریف شده باشد به‌عنوان محل کلیک
  * (hero، floating، navbar، ...) ثبت می‌شود.
+ *
+ * علاوه بر tel/whatsapp، کلیک روی لینک‌های داخلیِ مشاوره هم ردیابی می‌شود
+ * (هر <a> که به /consultation می‌رود یا data-cta آن با "consultation" شروع
+ * می‌شود). بدون این، اثربخشی قیف اصلی تبدیل نامرئی می‌ماند.
  */
 export default function TrackClicks() {
   const pathname = usePathname();
@@ -31,6 +35,8 @@ export default function TrackClicks() {
         trackEvent("tel_click", { path: pathname, cta });
       } else if (href.startsWith("https://wa.me/") || href.startsWith("http://wa.me/")) {
         trackEvent("whatsapp_click", { path: pathname, cta });
+      } else if (/\/consultation(\/|$|\?)/.test(href) || cta?.startsWith("consultation")) {
+        trackEvent("consultation_cta_click", { path: pathname, cta });
       }
     };
 

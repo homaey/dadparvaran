@@ -92,7 +92,7 @@ export default function ArticlesSection({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={featured.author.photoUrl}
-                        alt=""
+                        alt={isRTL ? featured.author.nameFA : featured.author.nameEN}
                         className="w-full h-full object-cover"
                       />
                     ) : (

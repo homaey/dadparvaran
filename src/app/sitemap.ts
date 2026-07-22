@@ -129,6 +129,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   } catch {}
 
+  // اوراق قضایی فقط FA — فهرست + هر قالب منتشرشده. تنها شکاف ایندکس شناسایی‌شده.
+  let formEntries: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE_URL}/fa/forms`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+  ];
+  try {
+    const forms = await db.legalFormTemplate.findMany({
+      where: { isPublished: true },
+      select: { slug: true, updatedAt: true },
+    });
+    formEntries = [
+      ...formEntries,
+      ...forms.map((f) => ({
+        url: `${BASE_URL}/fa/forms/${f.slug}`,
+        lastModified: f.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.6,
+      })),
+    ];
+  } catch {}
+
   let teamEntries: MetadataRoute.Sitemap = [];
   try {
     const members = await db.teamMember.findMany({
@@ -196,6 +221,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...lawEntries,
     ...lawArticleEntries,
     ...tagEntries,
+    ...formEntries,
     ...teamEntries,
   ];
 }
