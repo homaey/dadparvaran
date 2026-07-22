@@ -14,6 +14,12 @@ import { publishConsultationToLawyersGroup } from "@/modules/consultations/publi
  * نتیجه در هر دو مسیر یکسان است: یک ConsultationRequest با status=OPEN که
  * روی گروه وکلا در بله منتشر می‌شود و هر وکیل می‌تواند بپذیرد.
  */
+function buildBaleFollowUpUrl(clientLinkToken: string | null): string | null {
+  const botUrl = process.env.BALE_BOT_PUBLIC_URL?.trim();
+  if (!botUrl || !clientLinkToken) return null;
+  return `${botUrl.replace(/\/$/, "")}?start=${encodeURIComponent(clientLinkToken)}`;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const parsed = webConsultationInputSchema.parse(await request.json());
@@ -38,7 +44,16 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { ok: true, publicCode: saved.publicCode, status: saved.status, postedToGroup },
+      {
+        ok: true,
+        publicCode: saved.publicCode,
+        status: saved.status,
+        postedToGroup,
+        // deep-link «پیگیری در بله». از env سرور ساخته می‌شود نه NEXT_PUBLIC_*،
+        // تا تغییر آدرس بازو نیازی به بیلد دوباره‌ی کلاینت نداشته باشد. اگر
+        // بازو تنظیم نشده باشد null است و دکمه در فرم رندر نمی‌شود.
+        baleFollowUpUrl: buildBaleFollowUpUrl(saved.clientLinkToken),
+      },
       { status: 201 }
     );
   } catch (error) {

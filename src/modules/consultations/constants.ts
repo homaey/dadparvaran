@@ -38,6 +38,7 @@ export const CONSULTATION_EVENT_TYPES = {
   CLOSED: "CLOSED",
   ADMIN_UPDATED: "ADMIN_UPDATED",
   LAWYER_LINKED: "LAWYER_LINKED",
+  CLIENT_BALE_LINKED: "CLIENT_BALE_LINKED",
 } as const;
 
 export const ALLOWED_STATUS_TRANSITIONS: Record<ConsultationStatus, ConsultationStatus[]> = {

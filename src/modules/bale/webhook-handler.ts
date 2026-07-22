@@ -7,6 +7,7 @@ import { startKeyboard } from "./message-templates";
 import type { BaleCallbackQuery, BaleMessage, BaleUpdate } from "./types";
 import { activateLawyerBaleAccount } from "@/modules/consultations/activation";
 import { claimConsultationRequest } from "@/modules/consultations/claim-request";
+import { linkClientBaleAccount } from "@/modules/consultations/link-client-bale";
 import { updateConsultationByLawyer } from "@/modules/consultations/update-status";
 
 async function beginUpdate(updateId: string): Promise<boolean> {
@@ -75,6 +76,30 @@ async function handleMessage(message: BaleMessage): Promise<void> {
         ? ["درخواست‌های فعال شما:", "", ...active.map((item) => `${item.publicCode} | ${item.category} | ${item.clientName} | ${item.status}`)].join("\n")
         : "درخواست فعالی به شما واگذار نشده است.",
     });
+    return;
+  }
+
+  // ‏/start با payload — از deep-link «پیگیری در بله» در صفحه‌ی موفقیت فرم
+  // سایت می‌آید و حساب متقاضی را به همان درخواست می‌بندد. باید پیش از شاخه‌ی
+  // /start عمومی بررسی شود، وگرنه پیام خوش‌آمد جای آن را می‌گیرد.
+  const startPayload = text.match(/^\/start\s+([A-Za-z0-9_-]{8,64})$/);
+  if (startPayload) {
+    const result = await linkClientBaleAccount({
+      token: startPayload[1],
+      baleUserId,
+      baleUsername: message.from.username,
+    });
+    if (!result.ok) {
+      await client.sendMessage({
+        chatId: message.chat.id,
+        text:
+          result.reason === "TAKEN_BY_ANOTHER_ACCOUNT"
+            ? "این درخواست پیش‌تر به حساب بله دیگری متصل شده است."
+            : "این لینک معتبر نیست. لطفاً دوباره از صفحه‌ی درخواست مشاوره اقدام کنید.",
+      });
+    }
+    // پیام موفقیت را خودِ linkClientBaleAccount می‌فرستد، چون بسته به اینکه
+    // درخواست پذیرفته شده باشد یا نه، دو پیام متفاوت لازم است.
     return;
   }
 

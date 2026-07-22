@@ -6,7 +6,6 @@ import { WebConsultationForm } from "@/components/consultation/WebConsultationFo
 import { getBreadcrumbSchema, getFAQSchema } from "@/lib/schema";
 import { primaryOffice } from "@/lib/offices";
 import { toWhatsAppLink } from "@/lib/whatsapp";
-import { BALE_BOT_URL } from "@/lib/consultation-cta";
 
 /**
  * صفحه‌ی مرکزی درخواست مشاوره.
@@ -52,7 +51,7 @@ const STEPS = [
   {
     icon: Phone,
     title: "تماس وکیل",
-    body: "اولین وکیلی که پرونده را بپذیرد، در ساعات کاری با شما تماس می‌گیرد. جلسه‌ی اول رایگان است.",
+    body: "اولین وکیلی که پرونده را بپذیرد، در ساعات کاری با شما تماس می‌گیرد. اگر بله دارید، می‌توانید پس از ثبت فرم با یک ضربه نتیجه را همان‌جا دنبال کنید و مستقیم با وکیل گفت‌وگو کنید. جلسه‌ی اول رایگان است.",
   },
 ];
 
@@ -186,32 +185,11 @@ export default function ConsultationPage() {
               />
             </div>
 
-            {/* ستون کناری — مسیر بله و تماس مستقیم */}
+            {/* ستون کناری — تماس مستقیم.
+                کارت «حساب بله دارید؟» عمداً این‌جا نیست: پیشنهاد بله به صفحه‌ی
+                موفقیتِ فرم منتقل شد. آن‌جا یک ضربه است و کاربر پیش از ثبت
+                درخواست مجبور به انتخاب میان دو مسیر نمی‌شود. */}
             <aside className="space-y-6">
-              {BALE_BOT_URL && (
-                <div className="rounded-2xl border border-[#2AABEE]/20 bg-[#2AABEE]/5 p-6">
-                  <div className="mb-3 flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5 text-[#2AABEE]" />
-                    <h3 className="font-fa text-base font-bold text-primary-900">حساب بله دارید؟</h3>
-                  </div>
-                  <p className="mb-5 text-sm leading-7 text-gray-600">
-                    اگر اپلیکیشن بله را دارید، درخواستتان را همان‌جا ثبت کنید. مزیتش این است که
-                    پس از پذیرش درخواست، لینک گفت‌وگوی مستقیم با وکیل برایتان ارسال می‌شود و
-                    لازم نیست منتظر تماس بمانید.
-                  </p>
-                  <a
-                    href={BALE_BOT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-cta="consultation-bale"
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-5 py-3.5 font-semibold text-white transition-all hover:brightness-95"
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    ثبت درخواست در بله
-                  </a>
-                </div>
-              )}
-
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
                 <h3 className="font-fa mb-4 text-base font-bold text-primary-900">تماس مستقیم</h3>
                 <div className="space-y-3 text-sm">

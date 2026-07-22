@@ -158,6 +158,26 @@ export function userHandoffKeyboard(input: {
   return { inline_keyboard: rows };
 }
 
+/**
+ * تأیید اتصال حساب بله به درخواستی که از فرم سایت ثبت شده است.
+ * هنوز وکیلی آن را نپذیرفته، پس فقط انتظار را روشن می‌کند.
+ */
+export function clientLinkedMessage(input: {
+  publicCode: string;
+  alreadyLinked: boolean;
+}): string {
+  return [
+    input.alreadyLinked
+      ? "این درخواست از قبل به حساب شما متصل بود."
+      : "✅ درخواست شما به حساب بله‌تان متصل شد.",
+    "",
+    `کد درخواست: ${input.publicCode}`,
+    "",
+    "به‌محض اینکه یکی از وکلا درخواست را بپذیرد، همین‌جا به شما اطلاع می‌دهیم و",
+    "دکمه‌ی گفت‌وگوی مستقیم با وکیل را برایتان می‌فرستیم.",
+  ].join("\n");
+}
+
 export function startKeyboard(miniAppUrl: string): BaleInlineKeyboardMarkup {
   return {
     inline_keyboard: [[{ text: "ثبت درخواست مشاوره", web_app: { url: miniAppUrl } }]],

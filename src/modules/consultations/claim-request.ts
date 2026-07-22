@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { getBaleClient } from "@/modules/bale/client";
+import { BaleApiError, getBaleClient } from "@/modules/bale/client";
 import { getBaleConfig } from "@/modules/bale/config";
 import {
   ACTIVE_LAWYER_REQUEST_STATUSES,
@@ -25,6 +25,43 @@ function memberIsActive(status: string, isMember?: boolean): boolean {
   return status === "creator" || status === "administrator" || status === "member" || (status === "restricted" && isMember === true);
 }
 
+/**
+ * بررسی عضویت وکیل در گروه — با تحمل محدودیت API بله.
+ *
+ * بله برخلاف تلگرام، `getChatMember` را برای باتی که ادمین گروه نیست با
+ * «403 Forbidden: permission_denied» رد می‌کند (در حالی که `getChat` کار
+ * می‌کند). اگر این خطا را مثل «عضو نیست» تفسیر کنیم، هیچ وکیلی نمی‌تواند
+ * درخواستی را بپذیرد و کل سامانه از کار می‌افتد.
+ *
+ * این بررسی لایه‌ی دوم دفاع است، نه اول: لایه‌ی اول LawyerBaleAccount است که
+ * فقط با کد فعال‌سازیِ صادرشده توسط مدیر ساخته می‌شود و مدیر باید آن را
+ * isVerified کند. پس وقتی بله پاسخ نمی‌دهد، اجازه می‌دهیم کار ادامه یابد و
+ * نتیجه‌ی نامعلوم را در رویداد ثبت می‌کنیم تا در ممیزی قابل پیگیری باشد.
+ *
+ * راه‌حل قطعی، ادمین‌کردن بات در گروه است؛ آن‌گاه این تابع پاسخ واقعی می‌گیرد.
+ */
+async function checkGroupMembership(
+  client: ReturnType<typeof getBaleClient>,
+  groupChatId: string,
+  baleUserId: string
+): Promise<{ allowed: boolean; verified: boolean }> {
+  try {
+    const membership = await client.getChatMember(groupChatId, baleUserId);
+    return { allowed: memberIsActive(membership.status, membership.is_member), verified: true };
+  } catch (error) {
+    const isPermissionDenied =
+      error instanceof BaleApiError && (error.errorCode === 403 || error.status === 403);
+    if (!isPermissionDenied) throw error;
+
+    console.warn("Bale getChatMember denied — group membership left unverified", {
+      groupChatId,
+      baleUserId,
+      hint: "Promote the bot to group administrator to enable this check.",
+    });
+    return { allowed: true, verified: false };
+  }
+}
+
 export async function claimConsultationRequest(input: {
   claimToken: string;
   baleUserId: string;
@@ -41,8 +78,12 @@ export async function claimConsultationRequest(input: {
     return { ok: false, reason: "NOT_ELIGIBLE" };
   }
 
-  const membership = await client.getChatMember(config.BALE_LAWYERS_GROUP_CHAT_ID, input.baleUserId);
-  if (!memberIsActive(membership.status, membership.is_member)) {
+  const membership = await checkGroupMembership(
+    client,
+    config.BALE_LAWYERS_GROUP_CHAT_ID,
+    input.baleUserId
+  );
+  if (!membership.allowed) {
     return { ok: false, reason: "NOT_ELIGIBLE" };
   }
 
@@ -67,6 +108,7 @@ export async function claimConsultationRequest(input: {
     eventType: CONSULTATION_EVENT_TYPES.CLAIM_ATTEMPTED,
     actorType: "LAWYER",
     actorId: String(account.lawyerId),
+    metadata: { groupMembershipVerified: membership.verified },
   });
 
   const acceptedAt = new Date();

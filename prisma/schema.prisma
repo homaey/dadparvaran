@@ -532,6 +532,11 @@ model ConsultationRequest {
   // در آن حالت واگذاری فقط تلفنی است و پیام «چت با وکیل» ارسال نمی‌شود.
   userBaleId         String?
   userBaleUsername   String?
+  // توکن یک‌بارمصرفِ «پیگیری در بله» برای متقاضیِ فرم سایت. در deep-link
+  // ble.ir/<bot>?start=<token> می‌نشیند و با /start حسابِ بله‌ی متقاضی را به
+  // همین درخواست می‌بندد. جدا از claimToken است — آن مالِ وکیل است و اگر به
+  // دست متقاضی بیفتد می‌تواند درخواست خودش را بپذیرد.
+  clientLinkToken    String?   @unique
   clientName         String
   // برای source=WEB_FORM اجباری است (تنها راه تماس)، برای مینی‌اپ اختیاری.
   phone              String?

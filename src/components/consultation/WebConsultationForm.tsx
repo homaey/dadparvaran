@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, ReactNode, useMemo, useState } from "react";
-import { CheckCircle2, Copy, Loader2, Phone, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, MessageCircle, Phone, ShieldCheck } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import {
   CASE_STAGES,
@@ -72,7 +72,11 @@ export function WebConsultationForm({ officePhone, officePhoneDisplay }: {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
-  const [result, setResult] = useState<{ publicCode: string; postedToGroup: boolean } | null>(null);
+  const [result, setResult] = useState<{
+    publicCode: string;
+    postedToGroup: boolean;
+    baleFollowUpUrl: string | null;
+  } | null>(null);
 
   const progress = useMemo(() => `${Math.round((step / TOTAL_STEPS) * 100)}%`, [step]);
   const set = <K extends keyof FormState,>(key: K, value: FormState[K]) => {
@@ -124,7 +128,11 @@ export function WebConsultationForm({ officePhone, officePhoneDisplay }: {
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || "ثبت درخواست ناموفق بود.");
-      setResult({ publicCode: payload.publicCode, postedToGroup: payload.postedToGroup });
+      setResult({
+        publicCode: payload.publicCode,
+        postedToGroup: payload.postedToGroup,
+        baleFollowUpUrl: payload.baleFollowUpUrl ?? null,
+      });
       trackEvent("consultation_submit", { category: form.category, urgency: form.urgency });
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "خطای ناشناخته رخ داد.");
@@ -174,11 +182,40 @@ export function WebConsultationForm({ officePhone, officePhoneDisplay }: {
           </p>
         )}
 
+        {/* پیشنهاد بله *پس از* ثبت درخواست می‌آید، نه پیش از آن. کاربر دیگر
+            مجبور نیست میان «بله دارم / ندارم» تصمیم بگیرد تا بتواند درخواست
+            بدهد؛ اگر بله دارد، یک ضربه کافی است تا نتیجه را همان‌جا بگیرد. */}
+        {result.baleFollowUpUrl && (
+          <div className="mx-auto mb-6 max-w-md rounded-2xl border border-[#2AABEE]/25 bg-[#2AABEE]/5 p-5">
+            <div className="mb-2 flex items-center justify-center gap-2">
+              <MessageCircle className="h-5 w-5 text-[#2AABEE]" />
+              <h4 className="font-fa font-bold text-primary-900">بله دارید؟</h4>
+            </div>
+            <p className="mb-4 text-sm leading-7 text-gray-600">
+              با یک ضربه، نتیجه را در بله دنبال کنید. به‌محض پذیرش درخواست، پیام
+              می‌گیرید و می‌توانید مستقیم با وکیل گفت‌وگو کنید — بدون منتظر ماندن برای تماس.
+            </p>
+            <a
+              href={result.baleFollowUpUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cta="consultation-success-bale"
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#2AABEE] px-5 py-3.5 font-semibold text-white transition-all hover:brightness-95"
+            >
+              <MessageCircle className="h-4 w-4" />
+              پیگیری در بله
+            </a>
+            <p className="mt-3 text-xs leading-6 text-gray-500">
+              اگر بله ندارید نیازی به این کار نیست — وکیل تلفنی با شما تماس می‌گیرد.
+            </p>
+          </div>
+        )}
+
         <a
           href={`tel:${officePhone}`}
           data-cta="consultation-success-tel"
           dir="ltr"
-          className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-primary-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-800"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 px-6 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
         >
           <Phone className="h-4 w-4" />
           {officePhoneDisplay}

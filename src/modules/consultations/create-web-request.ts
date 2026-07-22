@@ -40,6 +40,9 @@ export async function createWebConsultationRequest(input: WebConsultationInput) 
     data: {
       publicCode: await uniquePublicCode(),
       claimToken: createClaimToken(),
+      // توکنِ «پیگیری در بله» — در deep-link صفحه‌ی موفقیت می‌نشیند. عمداً
+      // جدا از claimToken تولید می‌شود؛ آن یکی مالِ وکیل است.
+      clientLinkToken: createClaimToken(),
       source: WEB_FORM_SOURCE,
       status: "OPEN",
       // متقاضی حساب بله ندارد — واگذاری تلفنی انجام می‌شود.
